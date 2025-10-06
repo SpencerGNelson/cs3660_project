@@ -1,8 +1,5 @@
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
-<link rel="stylesheet" href="../index.css" />
-<body>
-<nav data-include="../common/nav.html"></nav>
-<main>
+{%extends "layout.html" %}
+{% block main %}
     <h2>Register</h2>
     <form >
         <div>
@@ -21,12 +18,4 @@
             <input type="submit">
         </div>
     </form>
-</main>
-<footer data-include="../common/footer.html"></footer>
-</body>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"></script>
-<script src="../index.js"></script>
-<script>basedir = "../";</script>
-<script>
-    includeall()
-</script>
+{% endblock %}

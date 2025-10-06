@@ -50,9 +50,5 @@ def image(pathname):
 def css():
     return send_file("index.css")
 
-@app.route("/index.js")
-def js():
-    return send_file("index.js")
-
 if __name__ == "__main__":
     app.run(debug=True)
