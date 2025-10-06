@@ -42,9 +42,9 @@ def nav():
 def footer():
     return render_template("common/footer.html")
 
-@app.route("/images/<path:pathname")
+@app.route("/images/<path:pathname>")
 def image(pathname):
-    return send_file(f"/images/{pathname}")
+    return send_file(f"images/{pathname}")
 
 @app.route("/index.css")
 def css():
