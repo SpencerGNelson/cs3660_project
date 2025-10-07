@@ -1,4 +1,5 @@
 from flask import Flask, redirect, render_template, send_file
+from model import get_professionals, get_services
 
 app = Flask(__name__)
 
@@ -16,11 +17,13 @@ def contact():
 
 @app.route("/services")
 def services():
-    return render_template("services.html")
+    categories = get_services()
+    return render_template("services.html", categories=categories)
 
 @app.route("/professionals")
 def professionals():
-    return render_template("professionals.html")
+    professionals = get_professionals()
+    return render_template("professionals.html", professionals=professionals)
 
 @app.route("/login")
 def login():
