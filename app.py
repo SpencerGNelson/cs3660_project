@@ -1,5 +1,5 @@
 from flask import Flask, redirect, render_template, send_file
-from model import get_professionals, get_services
+from models import get_professionals, get_services
 
 app = Flask(__name__)
 
