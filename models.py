@@ -1,4 +1,5 @@
 import sqlite3
+import json
 
 def get_professionals():
     conn = None
@@ -6,17 +7,14 @@ def get_professionals():
     try:
         conn = sqlite3.connect('company.db')
         conn.row_factory = sqlite3.Row
-
         cur = conn.cursor()
-
         query = """
         SELECT * FROM professionals
         """
-
         cur.execute(query)
-
-        professionals = [dict(row) for row in cur.fetchall()]
-        return professionals
+        rows = cur.fetchall()  
+        conn.close()      
+        return rows
 
     except sqlite3.Error as e:
         print(f"Database error: {e}")
@@ -31,17 +29,14 @@ def get_services():
     try:
         conn = sqlite3.connect('company.db')
         conn.row_factory = sqlite3.Row
-
         cur = conn.cursor()
-
         query = """
         SELECT * FROM services
         """
-
         cur.execute(query)
-
-        services = [dict(row) for row in cur.fetchall()]
-        return services
+        rows = cur.fetchall()  
+        conn.close()      
+        return rows
 
     except sqlite3.Error as e:
         print(f"Database error: {e}")
