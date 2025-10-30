@@ -23,27 +23,44 @@ def get_professionals():
         if conn:
             conn.close()
 
+import sqlite3
+from collections import defaultdict
+
 def get_services():
-    conn = None
+    conn = sqlite3.connect('company.db')
+    conn.row_factory = sqlite3.Row
+    cur = conn.cursor()
 
-    try:
-        conn = sqlite3.connect('company.db')
-        conn.row_factory = sqlite3.Row
-        cur = conn.cursor()
-        query = """
-        SELECT * FROM services
-        """
-        cur.execute(query)
-        rows = cur.fetchall()  
-        conn.close()      
-        return rows
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS categories (
+            id   INTEGER PRIMARY KEY,
+            name TEXT NOT NULL
+        )
+    """)
 
-    except sqlite3.Error as e:
-        print(f"Database error: {e}")
-        raise
-    finally:
-        if conn:
-            conn.close()
+    cur.execute("SELECT id, name FROM categories ORDER BY id")
+    categories = [dict(row) for row in cur.fetchall()]
+
+   
+    cur.execute("SELECT categoryid, servicename FROM services ORDER BY id")
+    flat_services = [dict(row) for row in cur.fetchall()]
+
+    conn.close()
+   
+    grouped = defaultdict(list)
+    for s in flat_services:
+        grouped[s['categoryid']].append(s['servicename'])
+
+    result = []
+    for cat in categories:
+        cat_id = cat['id']
+        result.append({
+            'id': cat_id,
+            'name': cat['name'],
+            'services': grouped[cat_id]
+        })
+
+    return result
 
 def add_user(username, name, level, password):
     account = username
