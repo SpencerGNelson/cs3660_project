@@ -1,0 +1,12 @@
+{%extends "layout.html" %}
+{% block main %}
+    <h2>Meet our Support Staff</h2>
+    <div class="row">
+        {% for pro in professionals %}
+        <div class="col text-center">
+            <h3>{{ pro["name"] }}</h3>
+            <img src="../images/{{ pro["image"] }}" style="width: 225px;">
+        </div>
+        {% endfor %}
+    </div>    
+{% endblock %}
