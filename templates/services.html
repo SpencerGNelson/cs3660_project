@@ -1,20 +1,33 @@
-{%extends "layout.html" %}
+{% extends "layout.html" %}
 {% block main %}
-    <h2>Services</h2>
-    <div class="row">
-        {% for category in categories %}
-        <div class="card col">
-            <div class="card-title">
-                <h3>{{ category["name"] }}</h3>
-            </div>
-            <div class="card-body">
-                <div class="list-group list-group-flush">
-                    {% for service in category["services"] %}
-                    <div class="list-item">{{ service }}</div>
-                    {% endfor %}
+    <h2 class="mb-4">Services</h2>
+
+    {% if not categories %}
+        <p class="text-muted">No services found in the database.</p>
+    {% else %}
+        <div class="row g-4">
+            {% for cat in categories %}
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <h3 class="h5 mb-0">{{ cat.name }}</h3>
+                    </div>
+                    <div class="card-body p-0">
+                        {% if cat.services %}
+                            <div class="list-group list-group-flush">
+                                {% for svc in cat.services %}
+                                    <div class="list-group-item">{{ svc }}</div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="list-group-item text-muted fst-italic">
+                                No services listed
+                            </div>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
+            {% endfor %}
         </div>
-        {% endfor %}
-    </div>
+    {% endif %}
 {% endblock %}
