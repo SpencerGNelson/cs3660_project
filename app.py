@@ -1,4 +1,4 @@
-from flask import Flask, redirect, render_template, send_file
+from flask import Flask, redirect, render_template, send_file, request
 from models import get_professionals, get_services
 
 app = Flask(__name__)
@@ -36,6 +36,31 @@ def register():
 @app.route("/pay")
 def pay():
     return render_template("pay.html")
+
+@app.route("/admin")
+def adminroute():
+    return render_template("admin.html")
+
+@app.route("/add_professional")
+def add_professional():
+    return render_template("add_professional.html")
+
+@app.route("/add_professional_submit", methods=["POST"])
+def add_professional_submit():
+    name = request.form.get("name")
+    email = request.form.get("email")
+    image_file = request.files["image_file"]
+    image_filename = image_file.filename
+    ext = image_filename.rsplit(".")[1]
+    return render_template("add_professional_submit.html")
+
+@app.route("/add_category")
+def add_category():
+    return render_template("add_category.html")
+
+@app.route("/add_service")
+def add_service():
+    return render_template("add_service.html")
 
 @app.route("/common/nav.html")
 def nav():

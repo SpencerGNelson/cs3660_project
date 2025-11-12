@@ -1,0 +1,21 @@
+{%extends "layout.html" %}
+{% block main %}
+    <h2>Add Service Provider</h2>
+    <form action="add_professional_submit" method="post" enctype="multipart/form-data">
+        <div>
+            Provider Name<br>
+            <input autocomplete="off" type="text" name="name" placeholder="Name">
+        </div>
+        <div>
+            Provider Email<br>
+            <input autocomplete="off" type="text" name="username" placeholder="Email">
+        </div>
+         <div>
+            Upload a Photo<br>
+            <input autocomplete="off" type="file" name="image_file" placeholder="Picture">
+        </div>
+         <div>
+            <input type="submit">
+        </div>
+    </form>
+{% endblock %}
