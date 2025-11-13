@@ -1,5 +1,5 @@
 from flask import Flask, redirect, render_template, send_file, request
-from models import get_professionals, get_services
+from models import get_professionals, get_services, get_categories
 
 app = Flask(__name__)
 
@@ -42,8 +42,9 @@ def adminroute():
     return render_template("admin.html")
 
 @app.route("/add_professional")
-def add_professional():
-    return render_template("add_professional.html")
+def add_professional_page():
+    professionals = get_professionals()
+    return render_template("add_professional.html", professionals=professionals)
 
 @app.route("/add_professional_submit", methods=["POST"])
 def add_professional_submit():
@@ -51,16 +52,44 @@ def add_professional_submit():
     email = request.form.get("email")
     image_file = request.files["image_file"]
     image_filename = image_file.filename
-    ext = image_filename.rsplit(".")[1]
+    ext = image_filename.rsplit(".", 1)[1]
+
+    id = add_professional_page(name, email, ext)
+    image_file.save(f"static/images/professional{id}.{ext}")
     return render_template("add_professional_submit.html")
 
 @app.route("/add_category")
-def add_category():
-    return render_template("add_category.html")
+def add_category_page():
+    categories = get_categories()
+    return render_template("add_category.html", categories=categories)
+
+@app.route("/add_category_submit", methods=["POST"])
+def add_category_submit():
+    name = request.form.get("name")
+    image_file = request.files["image_file"]
+    image_filename = image_file.filename
+    ext = image_filename.rsplit(".", 1)[1]
+
+    id = add_category_page(name, ext)
+    image_file.save(f"static/images/categories{id}.{ext}")
+    return render_template("add_category_submit.html")
 
 @app.route("/add_service")
-def add_service():
-    return render_template("add_service.html")
+def add_service_page():
+    services = get_services()
+    return render_template("add_service.html", services=services)
+
+#Needs fixing!!!
+@app.route("/add_service_submit", methods=["POST"])
+def add_service_submit():
+    name = request.form.get("name")
+    image_file = request.files["image_file"]
+    image_filename = image_file.filename
+    ext = image_filename.rsplit(".", 1)[1]
+
+    id = add_category_page(name)
+    image_file.save(f"static/images/categories{id}.{ext}")
+    return render_template("add_services_submit.html")
 
 @app.route("/common/nav.html")
 def nav():

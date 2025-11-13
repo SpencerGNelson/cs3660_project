@@ -1,0 +1,44 @@
+{%extends "layout.html" %}
+{% block main %}
+    {% if not categories %}
+        <p class="text-muted">No services found in the database.</p>
+    {% else %}
+        <div class="row g-4">
+            {% for cat in categories %}
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <h3 class="h5 mb-0">{{ cat.name }}</h3>
+                    </div>
+                    <div class="card-body p-0">
+                        {% if cat.services %}
+                            <div class="list-group list-group-flush">
+                                {% for svc in cat.services %}
+                                    <div class="list-group-item">{{ svc }}</div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="list-group-item text-muted fst-italic">
+                                No services listed
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+    <HR>    
+        Add a New Service Below
+    <HR>
+    <form action="add_services_submit" method="post" enctype="multipart/form-data">
+        <div>
+            Service Name<br>
+            <input autocomplete="off" type="text" name="name" placeholder="Name">
+        </div>
+        <div>
+            Category<br>
+            <input autocomplete="off" type="text" name="category name" placeholder="Name">
+        </div>
+    </form>
+{% endblock %}

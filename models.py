@@ -1,5 +1,6 @@
 import sqlite3
 import json
+from collections import defaultdict
 
 def get_professionals():
     conn = None
@@ -23,8 +24,28 @@ def get_professionals():
         if conn:
             conn.close()
 
-import sqlite3
-from collections import defaultdict
+def get_categories():
+    conn = None
+
+    try:
+        conn = sqlite3.connect('company.db')
+        conn.row_factory = sqlite3.Row
+        cur = conn.cursor()
+        query = """
+        SELECT * FROM categories
+        """
+        cur.execute(query)
+        rows = cur.fetchall()  
+        conn.close()      
+        return rows
+
+    except sqlite3.Error as e:
+        print(f"Database error: {e}")
+        raise
+    finally:
+        if conn:
+            conn.close()
+
 
 def get_services():
     conn = sqlite3.connect('company.db')
