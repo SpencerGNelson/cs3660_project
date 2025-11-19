@@ -1,6 +1,6 @@
 {%extends "layout.html" %}
 {% block main %}
-    {% if not categories %}
+    {% if not services %}
         <p class="text-muted">No services found in the database.</p>
     {% else %}
         <div class="row g-4">
@@ -31,14 +31,17 @@
     <HR>    
         Add a New Service Below
     <HR>
-    <form action="add_services_submit" method="post" enctype="multipart/form-data">
+    <form action="add_service_submit" method="post" enctype="multipart/form-data">
         <div>
             Service Name<br>
-            <input autocomplete="off" type="text" name="name" placeholder="Name">
+            <input autocomplete="off" type="text" name="servicename" placeholder="Name">
         </div>
         <div>
             Category<br>
-            <input autocomplete="off" type="text" name="category name" placeholder="Name">
+            <input autocomplete="off" type="text" name="category_name" placeholder="Name">
+        </div>
+        <div>
+            <input type="submit">
         </div>
     </form>
 {% endblock %}

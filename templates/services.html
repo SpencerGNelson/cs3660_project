@@ -1,8 +1,9 @@
 {% extends "layout.html" %}
 {% block main %}
+<div class="container my-4">
     <h2 class="mb-4">Services</h2>
 
-    {% if not categories %}
+    {% if not categories%}
         <p class="text-muted">No services found in the database.</p>
     {% else %}
         <div class="row g-4">
@@ -30,4 +31,5 @@
             {% endfor %}
         </div>
     {% endif %}
+</div>
 {% endblock %}

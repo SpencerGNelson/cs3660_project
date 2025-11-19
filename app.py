@@ -1,5 +1,5 @@
 from flask import Flask, redirect, render_template, send_file, request
-from models import get_professionals, get_services, get_categories
+from models import get_professionals, get_services, get_categories, add_service, add_professional, add_category
 
 app = Flask(__name__)
 
@@ -54,7 +54,7 @@ def add_professional_submit():
     image_filename = image_file.filename
     ext = image_filename.rsplit(".", 1)[1]
 
-    id = add_professional_page(name, email, ext)
+    id = add_professional(name, email, ext)
     image_file.save(f"static/images/professional{id}.{ext}")
     return render_template("add_professional_submit.html")
 
@@ -70,7 +70,7 @@ def add_category_submit():
     image_filename = image_file.filename
     ext = image_filename.rsplit(".", 1)[1]
 
-    id = add_category_page(name, ext)
+    id = add_category(name, ext)
     image_file.save(f"static/images/categories{id}.{ext}")
     return render_template("add_category_submit.html")
 
@@ -79,17 +79,34 @@ def add_service_page():
     services = get_services()
     return render_template("add_service.html", services=services)
 
-#Needs fixing!!!
 @app.route("/add_service_submit", methods=["POST"])
 def add_service_submit():
-    name = request.form.get("name")
-    image_file = request.files["image_file"]
-    image_filename = image_file.filename
-    ext = image_filename.rsplit(".", 1)[1]
+    servicename = request.form.get("servicename")
+    category_name = request.form.get("category_name")
+    
+    # Validate servicename is provided
+    if not servicename:
+        return "Service name is required", 400
+    
+    # Validate categoryid is provided and is a valid integer
+    if not category_name:
+        return "Category is required", 400
+    
+    
+    # Validate that the category exists in the database
+    categories = get_categories()
+    categoryid = None
+    for cat in categories:
+        if cat['name'] == category_name:
+            categoryid = cat['id']
+            break
 
-    id = add_category_page(name)
-    image_file.save(f"static/images/categories{id}.{ext}")
-    return render_template("add_services_submit.html")
+    # Validate that the category exists
+    if categoryid is None:
+        return "Category does not exist", 400
+    add_service(categoryid, servicename)
+    
+    return render_template("add_service_submit.html")
 
 @app.route("/common/nav.html")
 def nav():
