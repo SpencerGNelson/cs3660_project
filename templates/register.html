@@ -1,7 +1,8 @@
-{%extends "layout.html" %}
+{% extends "layout.html" %}
 {% block main %}
     <h2>Register</h2>
-    <form >
+    <div id="message"></div>
+    <form id="registerForm">
         <div>
             <input autocomplete="off" type="text" name="name" placeholder="Client Name">
         </div>
@@ -18,4 +19,37 @@
             <input type="submit">
         </div>
     </form>
+    
+    <script>
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const formData = new FormData(e.target);
+        
+        try {
+            const response = await fetch('/register', {
+                method: 'POST',
+                body: formData
+            });
+            
+            const text = await response.text();
+            
+            if (text === 'ok') {
+                alert('Registration successful!');
+                window.location.href = '/home';
+            } else if (text === 'err_missing') {
+                alert('Please fill in all required fields.');
+            } else if (text === 'err_mismatch') {
+                alert('Passwords do not match.');
+            } else if (text === 'err_db') {
+                alert('Registration failed. Username may already exist.');
+            } else {
+                alert('An error occurred. Please try again.');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Network error. Please try again.');
+        }
+    });
+    </script>
 {% endblock %}

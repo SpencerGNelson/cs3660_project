@@ -1,5 +1,6 @@
-from flask import Flask, redirect, render_template, send_file, request
-from models import get_professionals, get_services, get_categories, add_service, add_professional, add_category
+from flask import Flask, redirect, render_template, send_file, request, jsonify
+from models import get_professionals, get_services, get_categories, add_service, add_professional, add_category, add_user
+import os
 
 app = Flask(__name__)
 
@@ -11,9 +12,14 @@ def root():
 def home():
     return render_template("index.html")
 
-@app.route("/contact")
-def contact():
-    return render_template("contact.html")
+@app.route("/contact", methods=["POST"])
+def contact_submit():
+    name = request.form.get("name")
+    phone = request.form.get("phone")
+    email = request.form.get("email")
+    
+    if not name or not phone or not email:
+        return "err_missing", 400
 
 @app.route("/services")
 def services():
@@ -29,9 +35,25 @@ def professionals():
 def login():
     return render_template("login.html")
 
-@app.route("/register")
+@app.route("/register", methods=["POST"])
 def register():
-    return render_template("register.html")
+    name = request.form.get("name")
+    username = request.form.get("username")
+    password = request.form.get("password")
+    confirmation = request.form.get("confirmation")
+    
+    if not name or not username or not password or not confirmation:
+        return "err_missing", 400
+    
+    if password != confirmation:
+        return "err_mismatch", 400
+    
+    try:
+        add_user(username, name, "user", password)
+        return "ok", 200
+    except Exception as e:
+        print(f"Registration error: {e}")
+        return "err_db", 500
 
 @app.route("/pay")
 def pay():
@@ -50,13 +72,35 @@ def add_professional_page():
 def add_professional_submit():
     name = request.form.get("name")
     email = request.form.get("email")
+
+    if not name or not email:
+        return "err_missing", 400
+    
+    if "image_file" not in request.files:
+        return "err_missing", 400
+    
     image_file = request.files["image_file"]
+
+    if image_file.filename == "":
+        return "err_missing", 400
+    
     image_filename = image_file.filename
     ext = image_filename.rsplit(".", 1)[1]
 
-    id = add_professional(name, email, ext)
-    image_file.save(f"static/images/professional{id}.{ext}")
-    return render_template("add_professional_submit.html")
+    try:
+        id = add_professional(name, email, f"professional{id}.{ext}")
+    except Exception as e:
+        print(f"Database error: {e}")
+        return "err_db", 500
+    
+    try:
+        os.makedirs("static/images", exist_ok=True)
+        image_file.save(f"static/images/professional{id}.{ext}")
+    except Exception as e:
+        print(f"File save error: {e}")
+        return "err_filesave", 500
+    
+    return "ok", 200
 
 @app.route("/add_category")
 def add_category_page():
@@ -66,13 +110,34 @@ def add_category_page():
 @app.route("/add_category_submit", methods=["POST"])
 def add_category_submit():
     name = request.form.get("name")
+    
+    if not name:
+        return "err_missing", 400
+    
+    if "image_file" not in request.files:
+        return "err_missing", 400
+    
     image_file = request.files["image_file"]
+    
+    if image_file.filename == "":
+        return "err_missing", 400
     image_filename = image_file.filename
     ext = image_filename.rsplit(".", 1)[1]
 
-    id = add_category(name, ext)
-    image_file.save(f"static/images/categories{id}.{ext}")
-    return render_template("add_category_submit.html")
+    try:
+        id = add_category(name, f"categories{id}.{ext}")
+    except Exception as e:
+        print(f"Database error: {e}")
+        return "err_db", 500
+    
+    try:
+        os.makedirs("static/images", exist_ok=True)
+        image_file.save(f"static/images/categories{id}.{ext}")
+    except Exception as e:
+        print(f"File save error: {e}")
+        return "err_filesave", 500
+    
+    return "ok", 200
 
 @app.route("/add_service")
 def add_service_page():
@@ -84,27 +149,26 @@ def add_service_submit():
     servicename = request.form.get("servicename")
     category_name = request.form.get("category_name")
     
-    # Validate servicename is provided
-    if not servicename:
-        return "Service name is required", 400
+    if not servicename or not category_name:
+        return "err_missing", 400
     
-    # Validate categoryid is provided and is a valid integer
-    if not category_name:
-        return "Category is required", 400
-    
-    
-    # Validate that the category exists in the database
-    categories = get_categories()
-    categoryid = None
-    for cat in categories:
-        if cat['name'] == category_name:
-            categoryid = cat['id']
-            break
-
-    # Validate that the category exists
-    if categoryid is None:
-        return "Category does not exist", 400
-    add_service(categoryid, servicename)
+    try:
+        categories = get_categories()
+        categoryid = None
+        for cat in categories:
+            if cat['name'] == category_name:
+                categoryid = cat['id']
+                break
+        
+        if categoryid is None:
+            return "err_missing", 400
+        
+        add_service(categoryid, servicename)
+        return "ok", 200
+        
+    except Exception as e:
+        print(f"Database error: {e}")
+        return "err_db", 500
     
     return render_template("add_service_submit.html")
 

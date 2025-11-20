@@ -1,7 +1,8 @@
-{%extends "layout.html" %}
+{% extends "layout.html" %}
 {% block main %}
     <h2>Contact Us</h2>
-    <form >
+    <div id="message"></div>
+    <form id="contactForm">
         <div>
             <input autocomplete="off" type="text" name="name" placeholder="Your Name">
         </div>
@@ -15,4 +16,38 @@
             <input type="submit">
         </div>
     </form>
+    
+    <script>
+    document.getElementById('contactForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const formData = new FormData(e.target);
+        const messageDiv = document.getElementById('message');
+        
+        try {
+            const response = await fetch('/contact', {
+                method: 'POST',
+                body: formData
+            });
+            
+            const text = await response.text();
+            
+            messageDiv.innerHTML = '';
+            
+            if (text === 'ok') {
+                messageDiv.innerHTML = '<div class="alert alert-success alert-dismissible fade show" role="alert">Message sent successfully!<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>';
+                e.target.reset(); 
+            } else if (text === 'err_missing') {
+                messageDiv.innerHTML = '<div class="alert alert-danger alert-dismissible fade show" role="alert">Please fill in all required fields.<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>';
+            } else if (text === 'err_email') {
+                messageDiv.innerHTML = '<div class="alert alert-danger alert-dismissible fade show" role="alert">Failed to send email. Please try again later.<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>';
+            } else {
+                messageDiv.innerHTML = '<div class="alert alert-danger alert-dismissible fade show" role="alert">An error occurred. Please try again.<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>';
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            messageDiv.innerHTML = '<div class="alert alert-danger alert-dismissible fade show" role="alert">Network error. Please try again.<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>';
+        }
+    });
+    </script>
 {% endblock %}

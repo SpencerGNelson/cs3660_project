@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 {% block main %}
     <h2>Add Service Provider</h2>
-    <div class="row">
+    <div class="row" id="professionalsList">
         {% for pro in professionals %}
         <div class="col-md-4 text-center mb-4">
             <img src="{{ url_for('static', filename='images/' + pro['image_filename']) }}"
@@ -18,7 +18,8 @@
     <HR>    
         Add a New Service Provider Below
     <HR>
-    <form action="add_professional_submit" method="post" enctype="multipart/form-data">
+    <div id="message"></div>
+    <form id="professionalForm" enctype="multipart/form-data">
         <div>
             Provider Name<br>
             <input autocomplete="off" type="text" name="name" placeholder="Name">
@@ -35,4 +36,41 @@
             <input type="submit">
         </div>
     </form>
+    
+    <script>
+    document.getElementById('professionalForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const formData = new FormData(e.target);
+        const messageDiv = document.getElementById('message');
+        
+        try {
+            const response = await fetch('/add_professional_submit', {
+                method: 'POST',
+                body: formData
+            });
+            
+            const text = await response.text();
+            
+            messageDiv.innerHTML = '';
+            
+            if (text === 'ok') {
+                window.location.reload();
+            } else if (text === 'err_missing') {
+                alert('Please fill in all required fields and upload an image.');
+            } else if (text === 'err_filetype') {
+                alert('Invalid file type. Please upload a valid image (jpg, png, gif, webp).');
+            } else if (text === 'err_filesave') {
+                alert('Failed to save image file. Please try again.');
+            } else if (text === 'err_db') {
+                alert('Database error. Please try again.');
+            } else {
+                alert('An error occurred. Please try again.');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Network error. Please try again.');
+        }
+    });
+    </script>
 {% endblock %}

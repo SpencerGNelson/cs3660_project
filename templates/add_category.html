@@ -4,7 +4,7 @@
     {% if not categories %}
         <p class="text-muted">No services found in the database.</p>
     {% else %}
-        <div class="row g-4">
+        <div class="row g-4" id="categoriesList">
             {% for cat in categories %}
             <div class="col-md-6 col-lg-4">
                 <div class="card h-100 shadow-sm">
@@ -19,7 +19,8 @@
     <HR>
     Add Category
     <HR>
-    <form action="add_category_submit" method="post" enctype="multipart/form-data">
+    <div id="message"></div>
+    <form id="categoryForm" enctype="multipart/form-data">
         <div>
             Category<br>
             <input autocomplete="off" type="text" name="name" placeholder="Name">
@@ -32,4 +33,41 @@
             <input type="submit">
         </div>
     </form>
+    
+    <script>
+    document.getElementById('categoryForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const formData = new FormData(e.target);
+        const messageDiv = document.getElementById('message');
+        
+        try {
+            const response = await fetch('/add_category_submit', {
+                method: 'POST',
+                body: formData
+            });
+            
+            const text = await response.text();
+            
+            messageDiv.innerHTML = '';
+            
+            if (text === 'ok') {
+                window.location.reload();
+            } else if (text === 'err_missing') {
+                alert('Please fill in all required fields and upload an image.');
+            } else if (text === 'err_filetype') {
+                alert('Invalid file type. Please upload a valid image (jpg, png, gif, webp).');
+            } else if (text === 'err_filesave') {
+                alert('Failed to save image file. Please try again.');
+            } else if (text === 'err_db') {
+                alert('Database error. Please try again.');
+            } else {
+                alert('An error occurred. Please try again.');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Network error. Please try again.');
+        }
+    });
+    </script>
 {% endblock %}
