@@ -12,6 +12,10 @@ def root():
 def home():
     return render_template("index.html")
 
+@app.route("/contact")
+def contact():
+    return render_template("contact.html")
+
 @app.route("/contact", methods=["POST"])
 def contact_submit():
     name = request.form.get("name")
@@ -20,6 +24,8 @@ def contact_submit():
     
     if not name or not phone or not email:
         return "err_missing", 400
+
+    return "ok", 200
 
 @app.route("/services")
 def services():
@@ -35,8 +41,12 @@ def professionals():
 def login():
     return render_template("login.html")
 
-@app.route("/register", methods=["POST"])
+@app.route("/register")
 def register():
+    return render_template("register.html")
+
+@app.route("/register", methods=["POST"])
+def register_submit():
     name = request.form.get("name")
     username = request.form.get("username")
     password = request.form.get("password")
@@ -170,8 +180,6 @@ def add_service_submit():
         print(f"Database error: {e}")
         return "err_db", 500
     
-    return render_template("add_service_submit.html")
-
 @app.route("/common/nav.html")
 def nav():
     return render_template("common/nav.html")

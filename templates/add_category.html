@@ -2,12 +2,12 @@
 {% block main %}
     <h2>Add Category</h2>
     {% if not categories %}
-        <p class="text-muted">No services found in the database.</p>
+        <p class="text-muted">No categories found in the database.</p>
     {% else %}
-        <div class="row g-4" id="categoriesList">
+        <div class="row g-4 mb-5" id="categoriesList">
             {% for cat in categories %}
             <div class="col-md-6 col-lg-4">
-                <div class="card h-100 shadow-sm">
+                <div class="card shadow-sm">
                     <div class="card-header bg-primary text-white">
                         <h3 class="h5 mb-0">{{ cat.name }}</h3>
                     </div>
