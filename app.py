@@ -1,5 +1,5 @@
 from flask import Flask, redirect, render_template, send_file, request, jsonify
-from models import get_professionals, get_services, get_categories, add_service, add_professional, add_category, add_user
+from models import get_professionals, get_services, get_categories, add_service, add_professional, add_category, add_user, email_form
 import os
 
 app = Flask(__name__)
@@ -21,11 +21,21 @@ def contact_submit():
     name = request.form.get("name")
     phone = request.form.get("phone")
     email = request.form.get("email")
+    subject =request.form.get("subject")
+    message = request.form.get("message")
     
-    if not name or not phone or not email:
-        return "err_missing", 400
+    if not name or not phone or not email or not subject or not message:
+        return render_template("contact.html", error="Please fill in all required fields.")
 
-    return "ok", 200
+    try:
+        result = email_form(name, phone, email, subject, message)
+        if result:
+            return render_template("contact.html", success="Message sent successfully!")
+        else:
+            return render_template("contact.html", error="Failed to send email. Please try again later.")
+    except Exception as e:
+        print(f"Email error: {e}")
+        return render_template("contact.html", error="Failed to send email. Please try again later.")
 
 @app.route("/services")
 def services():
@@ -51,19 +61,19 @@ def register_submit():
     username = request.form.get("username")
     password = request.form.get("password")
     confirmation = request.form.get("confirmation")
-    
+
     if not name or not username or not password or not confirmation:
-        return "err_missing", 400
-    
+        return render_template("register.html", error="Please fill in all required fields.")
+
     if password != confirmation:
-        return "err_mismatch", 400
-    
+        return render_template("register.html", error="Passwords do not match.")
+
     try:
         add_user(username, name, "user", password)
-        return "ok", 200
+        return redirect("/login")
     except Exception as e:
         print(f"Registration error: {e}")
-        return "err_db", 500
+        return render_template("register.html", error="Registration failed. Username may already exist.")
 
 @app.route("/pay")
 def pay():
@@ -84,33 +94,45 @@ def add_professional_submit():
     email = request.form.get("email")
 
     if not name or not email:
-        return "err_missing", 400
-    
+        return render_template("add_professional.html",
+                             professionals=get_professionals(),
+                             error="Please fill in all required fields.")
+
     if "image_file" not in request.files:
-        return "err_missing", 400
-    
+        return render_template("add_professional.html",
+                             professionals=get_professionals(),
+                             error="Please upload an image file.")
+
     image_file = request.files["image_file"]
 
     if image_file.filename == "":
-        return "err_missing", 400
-    
+        return render_template("add_professional.html",
+                             professionals=get_professionals(),
+                             error="Please select an image file.")
+
     image_filename = image_file.filename
     ext = image_filename.rsplit(".", 1)[1]
 
     try:
-        id = add_professional(name, email, f"professional{id}.{ext}")
+        id = add_professional(name, email, ext)
     except Exception as e:
         print(f"Database error: {e}")
-        return "err_db", 500
-    
+        return render_template("add_professional.html",
+                             professionals=get_professionals(),
+                             error="Database error occurred. Please try again.")
+
     try:
         os.makedirs("static/images", exist_ok=True)
         image_file.save(f"static/images/professional{id}.{ext}")
     except Exception as e:
         print(f"File save error: {e}")
-        return "err_filesave", 500
-    
-    return "ok", 200
+        return render_template("add_professional.html",
+                             professionals=get_professionals(),
+                             error="Failed to save image file. Please try again.")
+
+    return render_template("add_professional.html",
+                         professionals=get_professionals(),
+                         success="Professional added successfully!")
 
 @app.route("/add_category")
 def add_category_page():
@@ -120,34 +142,47 @@ def add_category_page():
 @app.route("/add_category_submit", methods=["POST"])
 def add_category_submit():
     name = request.form.get("name")
-    
+
     if not name:
-        return "err_missing", 400
-    
+        return render_template("add_category.html",
+                             categories=get_categories(),
+                             error="Please fill in all required fields.")
+
     if "image_file" not in request.files:
-        return "err_missing", 400
-    
+        return render_template("add_category.html",
+                             categories=get_categories(),
+                             error="Please upload an image file.")
+
     image_file = request.files["image_file"]
-    
+
     if image_file.filename == "":
-        return "err_missing", 400
+        return render_template("add_category.html",
+                             categories=get_categories(),
+                             error="Please select an image file.")
+
     image_filename = image_file.filename
     ext = image_filename.rsplit(".", 1)[1]
 
     try:
-        id = add_category(name, f"categories{id}.{ext}")
+        id = add_category(name, ext)
     except Exception as e:
         print(f"Database error: {e}")
-        return "err_db", 500
-    
+        return render_template("add_category.html",
+                             categories=get_categories(),
+                             error="Database error occurred. Please try again.")
+
     try:
         os.makedirs("static/images", exist_ok=True)
-        image_file.save(f"static/images/categories{id}.{ext}")
+        image_file.save(f"static/images/category{id}.{ext}")
     except Exception as e:
         print(f"File save error: {e}")
-        return "err_filesave", 500
-    
-    return "ok", 200
+        return render_template("add_category.html",
+                             categories=get_categories(),
+                             error="Failed to save image file. Please try again.")
+
+    return render_template("add_category.html",
+                         categories=get_categories(),
+                         success="Category added successfully!")
 
 @app.route("/add_service")
 def add_service_page():
@@ -158,10 +193,12 @@ def add_service_page():
 def add_service_submit():
     servicename = request.form.get("servicename")
     category_name = request.form.get("category_name")
-    
+
     if not servicename or not category_name:
-        return "err_missing", 400
-    
+        return render_template("add_service.html",
+                             services=get_services(),
+                             error="Please fill in all required fields.")
+
     try:
         categories = get_categories()
         categoryid = None
@@ -169,16 +206,22 @@ def add_service_submit():
             if cat['name'] == category_name:
                 categoryid = cat['id']
                 break
-        
+
         if categoryid is None:
-            return "err_missing", 400
-        
+            return render_template("add_service.html",
+                                 services=get_services(),
+                                 error="Invalid category selected. Please try again.")
+
         add_service(categoryid, servicename)
-        return "ok", 200
-        
+        return render_template("add_service.html",
+                             services=get_services(),
+                             success="Service added successfully!")
+
     except Exception as e:
         print(f"Database error: {e}")
-        return "err_db", 500
+        return render_template("add_service.html",
+                             services=get_services(),
+                             error="Database error occurred. Please try again.")
     
 @app.route("/common/nav.html")
 def nav():

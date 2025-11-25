@@ -1,6 +1,36 @@
 import sqlite3
 import json
 from collections import defaultdict
+from email.message import EmailMessage
+import smtplib
+import getpass
+from flask import render_template
+
+def email_form(name, phone, email, subject, message):
+    username = getpass.getuser()
+    email_to = '10654678@uvu.edu'
+    email_from = f"{username}@host71.registrar-serviers.com"
+    email_subject = f"Contact Form: {subject}"
+    email_message = render_template("contact_email.html",
+                                    name = name,
+                                    phone = phone,
+                                    email = email,
+                                    subject = subject,
+                                    message = message)
+    
+    msg = EmailMessage()
+    msg.set_content(email_message, subtype='html')
+    msg['Subject'] = email_subject
+    msg['From'] = email_from
+    msg['To'] = email_to
+    try:
+        s = smtplib.SMTP('localhost')
+        s.send_message(msg)
+        s.quit()
+        return True
+    except Exception as e:
+        print(f"Email error: {e}")
+        return False
 
 def get_professionals():
     conn = None
@@ -108,22 +138,26 @@ def add_user(username, name, level, password):
         if conn:
             conn.close()
 
-def add_professional(name, email, image_filename):
-    query = """
-        INSERT INTO professionals (name, email, image_filename)
-        VALUES (?, ?, ?)
-        """ 
-    
-    values = (name, email, image_filename)
-    
+def add_professional(name, email, ext):
     conn = None
     try:
         conn = sqlite3.connect('company.db')
         cur = conn.cursor()
-        cur.execute(query, values)
+
+        query = """
+            INSERT INTO professionals (name, email, image_filename)
+            VALUES (?, ?, ?)
+        """
+        cur.execute(query, (name, email, ''))
+        professional_id = cur.lastrowid
+
+        full_filename = f"professional{professional_id}.{ext}"
+        update_query = "UPDATE professionals SET image_filename = ? WHERE id = ?"
+        cur.execute(update_query, (full_filename, professional_id))
+
         conn.commit()
-        return cur.lastrowid          
-    
+        return professional_id
+
     except sqlite3.Error as e:
         print(f"Database error: {e}")
         raise
@@ -131,22 +165,26 @@ def add_professional(name, email, image_filename):
         if conn:
             conn.close()
 
-def add_category(name, image_filename):
-    query = """
-        INSERT INTO categories (name, image_filename)
-        VALUES (?, ?)
-        """ 
-    
-    values = (name, image_filename)
-    
+def add_category(name, ext):
     conn = None
     try:
         conn = sqlite3.connect('company.db')
         cur = conn.cursor()
-        cur.execute(query, values)
+
+        query = """
+            INSERT INTO categories (name, image_filename)
+            VALUES (?, ?)
+        """
+        cur.execute(query, (name, ''))
+        category_id = cur.lastrowid
+
+        full_filename = f"category{category_id}.{ext}"
+        update_query = "UPDATE categories SET image_filename = ? WHERE id = ?"
+        cur.execute(update_query, (full_filename, category_id))
+
         conn.commit()
-        return cur.lastrowid          
-    
+        return category_id
+
     except sqlite3.Error as e:
         print(f"Database error: {e}")
         raise

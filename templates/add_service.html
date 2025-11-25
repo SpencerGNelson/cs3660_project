@@ -1,5 +1,21 @@
-{%extends "layout.html" %}
+{% extends "layout.html" %}
 {% block main %}
+    <h2>Add Service</h2>
+
+    {% if success %}
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        {{ success }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endif %}
+
+    {% if error %}
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        {{ error }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endif %}
+
     {% if not services %}
         <p class="text-muted">No services found in the database.</p>
     {% else %}
@@ -28,11 +44,10 @@
             {% endfor %}
         </div>
     {% endif %}
-    <HR>    
+    <HR>
         Add a New Service Below
     <HR>
-    <div id="message"></div>
-    <form id="serviceForm">
+    <form method="POST" action="/add_service_submit">
         <div>
             Service Name<br>
             <input autocomplete="off" type="text" name="servicename" id="servicename" placeholder="Name">
@@ -45,59 +60,4 @@
             <input type="submit">
         </div>
     </form>
-    
-    <script>
-    document.getElementById('serviceForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        
-        const formData = new FormData(e.target);
-        const servicename = formData.get('servicename');
-        const category_name = formData.get('category_name');
-        const messageDiv = document.getElementById('message');
-        
-        try {
-            const response = await fetch('/add_service_submit', {
-                method: 'POST',
-                body: formData
-            });
-            
-            const text = await response.text();
-            
-            messageDiv.innerHTML = '';
-            
-            if (text === 'ok') {
-                const categoryCard = document.querySelector(`[data-category="${category_name}"]`);
-                
-                if (categoryCard) {
-                    const listGroup = categoryCard.querySelector('.list-group');
-                    
-                    const emptyMsg = categoryCard.querySelector('.text-muted.fst-italic');
-                    if (emptyMsg) {
-                        emptyMsg.remove();
-                    }
-                    
-                    const newItem = document.createElement('div');
-                    newItem.className = 'list-group-item';
-                    newItem.textContent = servicename;
-                    listGroup.appendChild(newItem);
-                    
-                    e.target.reset();
-                    
-                    messageDiv.innerHTML = '<div class="alert alert-success alert-dismissible fade show" role="alert">Service added successfully!<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>';
-                } else {
-                    window.location.reload();
-                }
-            } else if (text === 'err_missing') {
-                alert('Please fill in all required fields and ensure the category exists.');
-            } else if (text === 'err_db') {
-                alert('Database error. Please try again.');
-            } else {
-                alert('An error occurred. Please try again.');
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            alert('Network error. Please try again.');
-        }
-    });
-    </script>
 {% endblock %}

@@ -1,6 +1,21 @@
 {% extends "layout.html" %}
 {% block main %}
     <h2>Add Category</h2>
+
+    {% if success %}
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        {{ success }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endif %}
+
+    {% if error %}
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        {{ error }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endif %}
+
     {% if not categories %}
         <p class="text-muted">No categories found in the database.</p>
     {% else %}
@@ -19,8 +34,7 @@
     <HR>
     Add Category
     <HR>
-    <div id="message"></div>
-    <form id="categoryForm" enctype="multipart/form-data">
+    <form method="POST" action="/add_category_submit" enctype="multipart/form-data">
         <div>
             Category<br>
             <input autocomplete="off" type="text" name="name" placeholder="Name">
@@ -33,41 +47,4 @@
             <input type="submit">
         </div>
     </form>
-    
-    <script>
-    document.getElementById('categoryForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        
-        const formData = new FormData(e.target);
-        const messageDiv = document.getElementById('message');
-        
-        try {
-            const response = await fetch('/add_category_submit', {
-                method: 'POST',
-                body: formData
-            });
-            
-            const text = await response.text();
-            
-            messageDiv.innerHTML = '';
-            
-            if (text === 'ok') {
-                window.location.reload();
-            } else if (text === 'err_missing') {
-                alert('Please fill in all required fields and upload an image.');
-            } else if (text === 'err_filetype') {
-                alert('Invalid file type. Please upload a valid image (jpg, png, gif, webp).');
-            } else if (text === 'err_filesave') {
-                alert('Failed to save image file. Please try again.');
-            } else if (text === 'err_db') {
-                alert('Database error. Please try again.');
-            } else {
-                alert('An error occurred. Please try again.');
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            alert('Network error. Please try again.');
-        }
-    });
-    </script>
 {% endblock %}

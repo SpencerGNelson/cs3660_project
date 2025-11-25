@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+        }
+        .field {
+            margin-bottom: 15px;
+        }
+        .field-label {
+            font-weight: bold;
+            color: #555;
+        }
+        .field-value {
+            margin-top: 5px;
+        }
+        .message-content {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-left: 4px solid #007bff;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <h2>New Contact Form Submission</h2>
+        
+        <div class="field">
+            <div class="field-label">Name:</div>
+            <div class="field-value">{{ name }}</div>
+        </div>
+        
+        <div class="field">
+            <div class="field-label">Phone:</div>
+            <div class="field-value">{{ phone }}</div>
+        </div>
+        
+        <div class="field">
+            <div class="field-label">Email:</div>
+            <div class="field-value">{{ email }}</div>
+        </div>
+        
+        <div class="field">
+            <div class="field-label">Subject:</div>
+            <div class="field-value">{{ subject }}</div>
+        </div>
+        
+        <div class="field">
+            <div class="field-label">Message:</div>
+            <div class="message-content">{{ message }}</div>
+        </div>
+    </div>
+</body>
+</html>
