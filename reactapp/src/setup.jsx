@@ -52,6 +52,6 @@ export const adminLinks = [
 
 export const appSettings = {
     appName: 'ADHD Support',
-    apiBaseUrl: 'http://localhost:5000',
+    apiBaseUrl: 'https://yourdomain.com',  // CHANGE THIS to your actual domain
     defaultTheme: 'light'
 }
