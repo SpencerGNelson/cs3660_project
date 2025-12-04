@@ -1,35 +1,67 @@
-{% extends "layout.html" %}
-{% block main %}
-<div class="container my-4">
-    <h2 class="mb-4">Services</h2>
+import { useState, useEffect } from 'react'
+import axiosInstance from '../axiosInstance'
+import { usePageTitle } from '../hooks/usePageTitle'
 
-    {% if not categories%}
-        <p class="text-muted">No services found in the database.</p>
-    {% else %}
-        <div class="row g-4">
-            {% for cat in categories %}
-            <div class="col-md-6 col-lg-4">
-                <div class="card h-100 shadow-sm">
-                    <div class="card-header bg-primary text-white">
-                        <h3 class="h5 mb-0">{{ cat.name }}</h3>
-                    </div>
-                    <div class="card-body p-0">
-                        {% if cat.services %}
-                            <div class="list-group list-group-flush">
-                                {% for svc in cat.services %}
-                                    <div class="list-group-item">{{ svc }}</div>
-                                {% endfor %}
+function Services() {
+    usePageTitle('Services')
+
+    const [categories, setCategories] = useState([])
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState(null)
+
+    useEffect(() => {
+        const fetchServices = async () => {
+            try {
+                const response = await axiosInstance.get('/api/get_services')
+                setCategories(response.data)
+                setLoading(false)
+            } catch (err) {
+                console.error('Error fetching services:', err)
+                setError('Failed to load services')
+                setLoading(false)
+            }
+        }
+
+        fetchServices()
+    }, [])
+
+    if (loading) return <p>Loading services...</p>
+    if (error) return <p className="text-danger">{error}</p>
+
+    return (
+        <div className="container my-4">
+            <h2 className="mb-4">Services</h2>
+
+            {!categories || categories.length === 0 ? (
+                <p className="text-muted">No services found in the database.</p>
+            ) : (
+                <div className="row g-4">
+                    {categories.map((cat) => (
+                        <div key={cat.id} className="col-md-6 col-lg-4">
+                            <div className="card h-100 shadow-sm">
+                                <div className="card-header bg-primary text-white">
+                                    <h3 className="h5 mb-0">{cat.name}</h3>
+                                </div>
+                                <div className="card-body p-0">
+                                    {cat.services && cat.services.length > 0 ? (
+                                        <div className="list-group list-group-flush">
+                                            {cat.services.map((svc, idx) => (
+                                                <div key={idx} className="list-group-item">{svc}</div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <div className="list-group-item text-muted fst-italic">
+                                            No services listed
+                                        </div>
+                                    )}
+                                </div>
                             </div>
-                        {% else %}
-                            <div class="list-group-item text-muted fst-italic">
-                                No services listed
-                            </div>
-                        {% endif %}
-                    </div>
+                        </div>
+                    ))}
                 </div>
-            </div>
-            {% endfor %}
+            )}
         </div>
-    {% endif %}
-</div>
-{% endblock %}
+    )
+}
+
+export default Services

@@ -1,8 +1,10 @@
 from flask import Flask, redirect, render_template, send_file, request, jsonify
+from flask_cors import CORS
 from models import get_professionals, get_services, get_categories, add_service, add_professional, add_category, add_user, email_form
 import os
 
 app = Flask(__name__)
+CORS(app)
 
 @app.route("/")
 def root():
@@ -238,6 +240,22 @@ def image(pathname):
 @app.route("/index.css")
 def css():
     return send_file("index.css")
+
+# JSON API routes for React frontend
+@app.route("/api/get_professionals")
+def api_get_professionals():
+    professionals = get_professionals()
+    return jsonify([dict(row) for row in professionals])
+
+@app.route("/api/get_services")
+def api_get_services():
+    services = get_services()
+    return jsonify(services)
+
+@app.route("/api/get_categories")
+def api_get_categories():
+    categories = get_categories()
+    return jsonify([dict(row) for row in categories])
 
 if __name__ == "__main__":
     app.run(debug=True)
