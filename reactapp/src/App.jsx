@@ -1,31 +1,35 @@
-import { useState } from 'react'
-import { Routes, Route, Link } from 'react-router-dom'
+import { Routes, Route } from 'react-router-dom'
 import {
   Home, Login, Register, Contact, Professionals,
   Services, Pay, Admin, AddProfessional, AddCategory,
   AddService
 } from './pages'
 import Layout from './pages/layouts/Layout'
+import AdminLayout from './pages/layouts/AdminLayout'
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <Layout>
       <Routes>
-        <Route path='/' element={<Home />}></Route>
-        <Route path='/professionals' element={<Professionals />}></Route>
-        <Route path='/services' element={<Services />}></Route>
-        <Route path='/contact' element={<Contact />}></Route>
-        <Route path='/pay' element={<Pay />}></Route>
-        <Route path='/login' element={<Login />}></Route>
-        <Route path='/register' element={<Register />}></Route>
-        <Route path='/admin' element={<Admin />}></Route>
-        <Route path='/add_category' element={<AddCategory />}></Route>
-        <Route path='/add_service' element={<AddService />}></Route>
-        <Route path='/add_professional' element={<AddProfessional />}></Route>
-      </Routes>
-    </Layout>
+        {/* Main site routes with Layout */}
+        <Route path='/' element={<Layout />}>
+          <Route index element={<Home />} />
+          <Route path='professionals' element={<Professionals />} />
+          <Route path='services' element={<Services />} />
+          <Route path='contact' element={<Contact />} />
+          <Route path='pay' element={<Pay />} />
+          <Route path='login' element={<Login />} />
+          <Route path='register' element={<Register />} />
+        </Route>
+
+
+      {/* Admin routes with AdminLayout */}
+      <Route path='/admin' element={<AdminLayout />}>
+        <Route index element={<Admin />} />
+        <Route path='add_category' element={<AddCategory />} />
+        <Route path='add_service' element={<AddService />} />
+        <Route path='add_professional' element={<AddProfessional />} />
+      </Route>
+    </Routes>
   )
 }
 

@@ -1,4 +1,5 @@
 import { usePageTitle } from '../hooks/usePageTitle'
+import { Form, TextInput, Submit } from '../widgets'
 
 function Pay() {
     usePageTitle('Pay')
@@ -6,30 +7,30 @@ function Pay() {
     return (
         <>
             <h2>Pay Your Bill</h2>
-            <form>
+            <Form>
                 <div>
-                    <input autoComplete="off" type="text" name="accountnumber" placeholder="Account Number" />
+                    <TextInput name="accountnumber" placeholder="Account Number" />
                 </div>
                 <div>
-                    <input autoComplete="off" type="text" name="cardholder" placeholder="Cardholder Name" />
+                    <TextInput name="cardholder" placeholder="Cardholder Name" />
                 </div>
                 <div>
-                    <input autoComplete="off" type="text" name="zip" placeholder="Cardholder Zip" />
+                    <TextInput name="zip" placeholder="Cardholder Zip" />
                 </div>
                 <div>
-                    <input autoComplete="off" type="text" name="cardnumber" placeholder="Card Number" />
+                    <TextInput name="cardnumber" placeholder="Card Number" />
                 </div>
                 <div>
-                    <input autoComplete="off" type="text" name="expmonth" placeholder="Exp Month" style={{width: '80px'}} /> /
-                    <input autoComplete="off" type="text" name="expyear" placeholder="Exp Year" style={{width: '80px'}} />
+                    <TextInput name="expmonth" placeholder="Exp Month" /> /
+                    <TextInput name="expyear" placeholder="Exp Year" />
                 </div>
                 <div>
-                    <input autoComplete="off" type="text" name="cvv" placeholder="CVV Code" />
+                    <TextInput name="cvv" placeholder="CVV Code" />
                 </div>
                 <div>
-                    <input type="submit" />
+                    <Submit />
                 </div>
-            </form>
+            </Form>
         </>
     )
 }

@@ -1,11 +1,41 @@
 import { useState } from 'react'
+import axiosInstance from '../axiosInstance'
 import { usePageTitle } from '../hooks/usePageTitle'
+import { Form, TextInput, TextArea, Submit } from '../widgets'
 
 function Contact() {
     usePageTitle('Contact')
 
     const [success, setSuccess] = useState(null)
     const [error, setError] = useState(null)
+    const [formData, setFormData] = useState({
+        name: '',
+        phone: '',
+        email: '',
+        subject: '',
+        message: ''
+    })
+
+    const handleChange = (e) => {
+        setFormData({
+            ...formData,
+            [e.target.name]: e.target.value
+        })
+    }
+
+    const handleSubmit = async (e) => {
+        e.preventDefault()
+        setSuccess(null)
+        setError(null)
+
+        try {
+            const response = await axiosInstance.post('/api/contact', formData)
+            setSuccess(response.data.success)
+            setFormData({ name: '', phone: '', email: '', subject: '', message: '' })
+        } catch (err) {
+            setError(err.response?.data?.error || 'An error occurred. Please try again.')
+        }
+    }
 
     return (
         <>
@@ -25,26 +55,26 @@ function Contact() {
                 </div>
             )}
 
-            <form method="POST" action="/contact">
+            <Form onSubmit={handleSubmit}>
                 <div>
-                    <input autoComplete="off" type="text" name="name" placeholder="Your Name" />
+                    <TextInput name="name" placeholder="Your Name" value={formData.name} onChange={handleChange} />
                 </div>
                 <div>
-                    <input autoComplete="off" type="text" name="phone" placeholder="Your Phone Number" />
+                    <TextInput name="phone" placeholder="Your Phone Number" value={formData.phone} onChange={handleChange} />
                 </div>
                 <div>
-                    <input autoComplete="off" type="email" name="email" placeholder="Your Email" />
+                    <TextInput name="email" placeholder="Your Email" value={formData.email} onChange={handleChange} />
                 </div>
                 <div>
-                    <input autoComplete="off" type="text" name="subject" placeholder="Subject" />
+                    <TextInput name="subject" placeholder="Subject" value={formData.subject} onChange={handleChange} />
                 </div>
                 <div>
-                    <textarea autoComplete="off" name="message" placeholder="Your Message" rows="5"></textarea>
+                    <TextArea name="message" placeholder="Your Message" rows={5} value={formData.message} onChange={handleChange} />
                 </div>
                 <div>
-                    <input type="submit" />
+                    <Submit />
                 </div>
-            </form>
+            </Form>
         </>
     )
 }

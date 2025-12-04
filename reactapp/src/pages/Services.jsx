@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import axiosInstance from '../axiosInstance'
 import { usePageTitle } from '../hooks/usePageTitle'
+import { Category } from '../widgets'
 
 function Services() {
     usePageTitle('Services')
@@ -37,26 +38,7 @@ function Services() {
             ) : (
                 <div className="row g-4">
                     {categories.map((cat) => (
-                        <div key={cat.id} className="col-md-6 col-lg-4">
-                            <div className="card h-100 shadow-sm">
-                                <div className="card-header bg-primary text-white">
-                                    <h3 className="h5 mb-0">{cat.name}</h3>
-                                </div>
-                                <div className="card-body p-0">
-                                    {cat.services && cat.services.length > 0 ? (
-                                        <div className="list-group list-group-flush">
-                                            {cat.services.map((svc, idx) => (
-                                                <div key={idx} className="list-group-item">{svc}</div>
-                                            ))}
-                                        </div>
-                                    ) : (
-                                        <div className="list-group-item text-muted fst-italic">
-                                            No services listed
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
+                        <Category key={cat.id} category={cat} serviceList={true} />
                     ))}
                 </div>
             )}

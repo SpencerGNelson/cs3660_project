@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import axiosInstance from '../axiosInstance'
 import { usePageTitle } from '../hooks/usePageTitle'
+import { Category, Form, TextInput, File, Submit } from '../widgets'
 
 function AddCategory() {
     usePageTitle('Add Category')
@@ -9,22 +10,61 @@ function AddCategory() {
     const [success, setSuccess] = useState(null)
     const [error, setError] = useState(null)
     const [loading, setLoading] = useState(true)
+    const [formData, setFormData] = useState({
+        name: '',
+        image_file: null
+    })
+
+    const fetchCategories = async () => {
+        try {
+            const response = await axiosInstance.get('/api/get_categories')
+            setCategories(response.data)
+            setLoading(false)
+        } catch (err) {
+            console.error('Error fetching categories:', err)
+            setError('Failed to load categories')
+            setLoading(false)
+        }
+    }
 
     useEffect(() => {
-        const fetchCategories = async () => {
-            try {
-                const response = await axiosInstance.get('/api/get_categories')
-                setCategories(response.data)
-                setLoading(false)
-            } catch (err) {
-                console.error('Error fetching categories:', err)
-                setError('Failed to load categories')
-                setLoading(false)
-            }
-        }
-
         fetchCategories()
     }, [])
+
+    const handleChange = (e) => {
+        setFormData({
+            ...formData,
+            [e.target.name]: e.target.value
+        })
+    }
+
+    const handleFileChange = (e) => {
+        setFormData({
+            ...formData,
+            image_file: e.target.files[0]
+        })
+    }
+
+    const handleSubmit = async (e) => {
+        e.preventDefault()
+        setSuccess(null)
+        setError(null)
+
+        const submitData = new FormData()
+        submitData.append('name', formData.name)
+        submitData.append('image_file', formData.image_file)
+
+        try {
+            const response = await axiosInstance.post('/api/add_category', submitData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            })
+            setSuccess(response.data.success)
+            setFormData({ name: '', image_file: null })
+            await fetchCategories()
+        } catch (err) {
+            setError(err.response?.data?.error || 'An error occurred. Please try again.')
+        }
+    }
 
     if (loading) return <p>Loading...</p>
 
@@ -51,32 +91,26 @@ function AddCategory() {
             ) : (
                 <div className="row g-4 mb-5" id="categoriesList">
                     {categories.map((cat) => (
-                        <div key={cat.id} className="col-md-6 col-lg-4">
-                            <div className="card shadow-sm">
-                                <div className="card-header bg-primary text-white">
-                                    <h3 className="h5 mb-0">{cat.name}</h3>
-                                </div>
-                            </div>
-                        </div>
+                        <Category key={cat.id} category={cat} serviceList={false} />
                     ))}
                 </div>
             )}
             <hr />
             Add Category
             <hr />
-            <form method="POST" action="/add_category_submit" encType="multipart/form-data">
+            <Form onSubmit={handleSubmit}>
                 <div>
                     Category<br />
-                    <input autoComplete="off" type="text" name="name" placeholder="Name" />
+                    <TextInput name="name" placeholder="Name" value={formData.name} onChange={handleChange} />
                 </div>
                 <div>
                     Upload a Photo<br />
-                    <input autoComplete="off" type="file" name="image_file" placeholder="Picture" />
+                    <File name="image_file" onChange={handleFileChange} />
                 </div>
                 <div>
-                    <input type="submit" />
+                    <Submit />
                 </div>
-            </form>
+            </Form>
         </>
     )
 }

@@ -1,4 +1,5 @@
 import { usePageTitle } from '../hooks/usePageTitle'
+import { Form, TextInput, Submit } from '../widgets'
 
 function Login() {
     usePageTitle('Login')
@@ -6,17 +7,17 @@ function Login() {
     return (
         <>
             <h2>Sign In</h2>
-            <form>
+            <Form>
                 <div>
-                    <input autoComplete="off" type="text" name="username" placeholder="Username" />
+                    <TextInput name="username" placeholder="Username" />
                 </div>
                 <div>
-                    <input autoComplete="off" type="password" name="password" placeholder="Password" />
+                    <TextInput name="password" placeholder="Password" password />
                 </div>
                 <div>
-                    <input type="submit" />
+                    <Submit />
                 </div>
-            </form>
+            </Form>
         </>
     )
 }

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import axiosInstance from '../axiosInstance'
 import { usePageTitle } from '../hooks/usePageTitle'
+import { Professional, Form, TextInput, File, Submit } from '../widgets'
 
 function AddProfessional() {
     usePageTitle('Add Professional')
@@ -9,22 +10,63 @@ function AddProfessional() {
     const [success, setSuccess] = useState(null)
     const [error, setError] = useState(null)
     const [loading, setLoading] = useState(true)
+    const [formData, setFormData] = useState({
+        name: '',
+        email: '',
+        image_file: null
+    })
+
+    const fetchProfessionals = async () => {
+        try {
+            const response = await axiosInstance.get('/api/get_professionals')
+            setProfessionals(response.data)
+            setLoading(false)
+        } catch (err) {
+            console.error('Error fetching professionals:', err)
+            setError('Failed to load professionals')
+            setLoading(false)
+        }
+    }
 
     useEffect(() => {
-        const fetchProfessionals = async () => {
-            try {
-                const response = await axiosInstance.get('/api/get_professionals')
-                setProfessionals(response.data)
-                setLoading(false)
-            } catch (err) {
-                console.error('Error fetching professionals:', err)
-                setError('Failed to load professionals')
-                setLoading(false)
-            }
-        }
-
         fetchProfessionals()
     }, [])
+
+    const handleChange = (e) => {
+        setFormData({
+            ...formData,
+            [e.target.name]: e.target.value
+        })
+    }
+
+    const handleFileChange = (e) => {
+        setFormData({
+            ...formData,
+            image_file: e.target.files[0]
+        })
+    }
+
+    const handleSubmit = async (e) => {
+        e.preventDefault()
+        setSuccess(null)
+        setError(null)
+
+        const submitData = new FormData()
+        submitData.append('name', formData.name)
+        submitData.append('email', formData.email)
+        submitData.append('image_file', formData.image_file)
+
+        try {
+            const response = await axiosInstance.post('/api/add_professional', submitData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            })
+            setSuccess(response.data.success)
+            setFormData({ name: '', email: '', image_file: null })
+            await fetchProfessionals()
+        } catch (err) {
+            setError(err.response?.data?.error || 'An error occurred. Please try again.')
+        }
+    }
 
     if (loading) return <p>Loading...</p>
 
@@ -48,38 +90,29 @@ function AddProfessional() {
 
             <div className="row" id="professionalsList">
                 {professionals.map((pro) => (
-                    <div key={pro.id} className="col-md-4 text-center mb-4">
-                        <img
-                            src={`http://localhost:5000/static/images/${pro.image_filename}`}
-                            style={{width: '225px', height: '225px', objectFit: 'cover', borderRadius: '50%'}}
-                            alt={pro.name}
-                            className="img-fluid mb-3"
-                        />
-                        <h3>{pro.name}</h3>
-                        {pro.title && <p className="text-muted">{pro.title}</p>}
-                    </div>
+                    <Professional key={pro.id} professional={pro} />
                 ))}
             </div>
             <hr />
             Add a New Service Provider Below
             <hr />
-            <form method="POST" action="/add_professional_submit" encType="multipart/form-data">
+            <Form onSubmit={handleSubmit}>
                 <div>
                     Provider Name<br />
-                    <input autoComplete="off" type="text" name="name" placeholder="Name" />
+                    <TextInput name="name" placeholder="Name" value={formData.name} onChange={handleChange} />
                 </div>
                 <div>
                     Provider Email<br />
-                    <input autoComplete="off" type="text" name="email" placeholder="Email" />
+                    <TextInput name="email" placeholder="Email" value={formData.email} onChange={handleChange} />
                 </div>
                 <div>
                     Upload a Photo<br />
-                    <input autoComplete="off" type="file" name="image_file" placeholder="Picture" />
+                    <File name="image_file" onChange={handleFileChange} />
                 </div>
                 <div>
-                    <input type="submit" />
+                    <Submit />
                 </div>
-            </form>
+            </Form>
         </>
     )
 }

@@ -37,15 +37,15 @@ export const adminLinks = [
         label: 'Admin'
     },
     {
-        path: '/add_professional',
+        path: '/admin/add_professional',
         label: 'Add Professional'
     },
     {
-        path: '/add_category',
+        path: '/admin/add_category',
         label: 'Add Category'
     },
     {
-        path: '/add_service',
+        path: '/admin/add_service',
         label: 'Add Service'
     }
 ]

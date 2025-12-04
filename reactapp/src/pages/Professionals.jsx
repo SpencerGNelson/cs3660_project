@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import axiosInstance from '../axiosInstance'
 import { usePageTitle } from '../hooks/usePageTitle'
+import { Professional } from '../widgets'
 
 function Professionals() {
     usePageTitle('Professionals')
@@ -33,16 +34,7 @@ function Professionals() {
             <h2>Meet our Support Staff</h2>
             <div className="row">
                 {professionals.map((pro) => (
-                    <div key={pro.id} className="col-md-4 text-center mb-4">
-                        <img
-                            src={`http://localhost:5000/static/images/${pro.image_filename}`}
-                            style={{width: '225px', height: '225px', objectFit: 'cover', borderRadius: '50%'}}
-                            alt={pro.name}
-                            className="img-fluid mb-3"
-                        />
-                        <h3>{pro.name}</h3>
-                        {pro.title && <p className="text-muted">{pro.title}</p>}
-                    </div>
+                    <Professional key={pro.id} professional={pro} />
                 ))}
             </div>
         </>
