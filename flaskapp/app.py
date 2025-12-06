@@ -1,10 +1,34 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from models import get_professionals, get_services, get_categories, add_service, add_professional, add_category, add_user, email_form
 import os
 
 app = Flask(__name__)
 CORS(app)
+
+# Define paths for React app and images
+REACT_DIST = os.path.join(os.path.dirname(__file__), '..', 'reactapp', 'dist')
+IMAGES_DIR = os.path.join(os.path.dirname(__file__), 'static', 'images')
+
+# Root route - serve React app
+@app.route("/")
+def index():
+    return send_from_directory(REACT_DIST, 'index.html')
+
+# Serve React assets (JS, CSS)
+@app.route("/assets/<path:filename>")
+def serve_assets(filename):
+    return send_from_directory(os.path.join(REACT_DIST, 'assets'), filename)
+
+# Serve public images from React dist/images (like logo)
+@app.route("/images/<path:filename>")
+def serve_public_images(filename):
+    return send_from_directory(os.path.join(REACT_DIST, 'images'), filename)
+
+# Serve images from flaskapp/static/images (professionals, categories)
+@app.route("/static/images/<path:filename>")
+def serve_images(filename):
+    return send_from_directory(IMAGES_DIR, filename)
 
 # JSON API routes for React frontend
 @app.route("/api/get_professionals")
@@ -159,6 +183,15 @@ def api_add_service():
     except Exception as e:
         print(f"Database error: {e}")
         return jsonify({"error": "Database error occurred. Please try again."}), 500
+
+# Catch-all route for React Router (must be at the end)
+@app.route('/<path:path>')
+def catch_all(path):
+    # If it's an API route, return 404
+    if path.startswith('api/'):
+        return jsonify({"error": "Not found"}), 404
+    # For all other routes, serve index.html to let React Router handle it
+    return send_from_directory(REACT_DIST, 'index.html')
 
 if __name__ == "__main__":
     app.run(debug=True)

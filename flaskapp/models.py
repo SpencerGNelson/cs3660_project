@@ -5,6 +5,11 @@ from email.message import EmailMessage
 import smtplib
 import getpass
 from flask import render_template
+import os
+
+# Get the absolute path to the database file
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DB_PATH = os.path.join(BASE_DIR, 'company.db')
 
 def email_form(name, phone, email, subject, message):
     username = getpass.getuser()
@@ -36,7 +41,7 @@ def get_professionals():
     conn = None
 
     try:
-        conn = sqlite3.connect('company.db')
+        conn = sqlite3.connect(DB_PATH)
         conn.row_factory = sqlite3.Row
         cur = conn.cursor()
         query = """
@@ -58,7 +63,7 @@ def get_categories():
     conn = None
 
     try:
-        conn = sqlite3.connect('company.db')
+        conn = sqlite3.connect(DB_PATH)
         conn.row_factory = sqlite3.Row
         cur = conn.cursor()
         query = """
@@ -78,7 +83,7 @@ def get_categories():
 
 
 def get_services():
-    conn = sqlite3.connect('company.db')
+    conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     cur = conn.cursor()
 
@@ -125,12 +130,12 @@ def add_user(username, name, level, password):
     
     conn = None
     try:
-        conn = sqlite3.connect('company.db')
+        conn = sqlite3.connect(DB_PATH)
         cur = conn.cursor()
         cur.execute(query, values)
         conn.commit()
-        return cur.lastrowid          
-    
+        return cur.lastrowid
+
     except sqlite3.Error as e:
         print(f"Database error: {e}")
         raise
@@ -141,7 +146,7 @@ def add_user(username, name, level, password):
 def add_professional(name, email, ext):
     conn = None
     try:
-        conn = sqlite3.connect('company.db')
+        conn = sqlite3.connect(DB_PATH)
         cur = conn.cursor()
 
         query = """
@@ -168,7 +173,7 @@ def add_professional(name, email, ext):
 def add_category(name, ext):
     conn = None
     try:
-        conn = sqlite3.connect('company.db')
+        conn = sqlite3.connect(DB_PATH)
         cur = conn.cursor()
 
         query = """
@@ -199,10 +204,10 @@ def add_service(categoryid, servicename):
         """ 
     
     values = (categoryid, servicename)
-    
+
     conn = None
     try:
-        conn = sqlite3.connect('company.db')
+        conn = sqlite3.connect(DB_PATH)
         cur = conn.cursor()
         cur.execute(query, values)
         conn.commit()
