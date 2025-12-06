@@ -52,6 +52,6 @@ export const adminLinks = [
 
 export const appSettings = {
     appName: 'ADHD Support',
-    apiBaseUrl: '',  // Empty string for relative URLs (since Flask serves the React app)
+    apiBaseUrl: '/cs3660_project/Project/flaskapp',  // Base URL for Flask API
     defaultTheme: 'light'
 }
