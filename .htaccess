@@ -1,0 +1,4 @@
+PassengerEnabled On
+PassengerAppRoot /home/student14/cs3660_project/Project/flaskapp
+PassengerPython /home/student14/virtualenv/cs3660_project_Project_flaskapp/3.13/bin/python3
+PassengerStartupFile app.py

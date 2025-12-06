@@ -1,3 +1,0 @@
-PassengerEnabled On
-PassengerAppRoot /home/yourusername/path/to/flaskapp
-PassengerPython /home/yourusername/virtualenv/python3/bin/python3

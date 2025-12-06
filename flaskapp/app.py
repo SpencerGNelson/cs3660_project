@@ -7,8 +7,9 @@ app = Flask(__name__)
 CORS(app)
 
 # Define paths for React app and images
-REACT_DIST = os.path.join(os.path.dirname(__file__), '..', 'reactapp', 'dist')
-IMAGES_DIR = os.path.join(os.path.dirname(__file__), 'static', 'images')
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+REACT_DIST = os.path.abspath(os.path.join(BASE_DIR, '..', 'reactapp', 'dist'))
+IMAGES_DIR = os.path.abspath(os.path.join(BASE_DIR, 'static', 'images'))
 
 # Root route - serve React app
 @app.route("/")
@@ -18,7 +19,18 @@ def index():
 # Serve React assets (JS, CSS)
 @app.route("/assets/<path:filename>")
 def serve_assets(filename):
-    return send_from_directory(os.path.join(REACT_DIST, 'assets'), filename)
+    assets_dir = os.path.join(REACT_DIST, 'assets')
+    file_path = os.path.join(assets_dir, filename)
+
+    # Debug logging
+    if not os.path.exists(file_path):
+        print(f"Asset not found: {file_path}")
+        print(f"REACT_DIST: {REACT_DIST}")
+        print(f"Assets dir: {assets_dir}")
+        print(f"File exists: {os.path.exists(file_path)}")
+        return jsonify({"error": "Asset not found", "path": file_path}), 404
+
+    return send_from_directory(assets_dir, filename)
 
 # Serve public images from React dist/images (like logo)
 @app.route("/images/<path:filename>")
