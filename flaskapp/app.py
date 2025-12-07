@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
-from models import get_professionals, get_services, get_categories, add_service, add_professional, add_category, add_user, email_form
+from models import get_professionals, get_services, get_categories, add_service, add_professional, add_category, add_user, email_form, check_login, create_login_token
 import os
 
 app = Flask(__name__)
@@ -101,6 +101,31 @@ def api_register():
     except Exception as e:
         print(f"Registration error: {e}")
         return jsonify({"error": "Registration failed. Username may already exist."}), 500
+
+@app.route("/api/login", methods=["POST"])
+def api_login():
+    data = request.get_json()
+    username = data.get("username")
+    password = data.get("password")
+
+    if not username or not password:
+        return "err_login_failed", 401
+
+    # Check credentials
+    user_info = check_login(username, password)
+
+    if user_info is None:
+        return "err_login_failed", 401
+
+    # Create JWT token
+    token = create_login_token(user_info)
+
+    # Return token and user info
+    return jsonify({
+        "token": token,
+        "name": user_info['name'],
+        "level": user_info['level']
+    })
 
 @app.route("/api/add_professional", methods=["POST"])
 def api_add_professional():

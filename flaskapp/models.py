@@ -6,10 +6,17 @@ import smtplib
 import getpass
 from flask import render_template
 import os
+from werkzeug.security import generate_password_hash, check_password_hash
+import jwt
+from datetime import datetime, timedelta
 
 # Get the absolute path to the database file
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, 'company.db')
+
+# JWT Secret Key (in production, this should be in environment variables)
+JWT_SECRET_KEY = 'your-secret-key-change-this-in-production'
+JWT_ALGORITHM = 'HS256'
 
 def email_form(name, phone, email, subject, message):
     username = getpass.getuser()
@@ -120,14 +127,15 @@ def get_services():
 
 def add_user(username, name, level, password):
     account = username
+    password_hash = generate_password_hash(password)
 
     query = """
         INSERT INTO users (account, name, username, level, password_hash)
         VALUES (?, ?, ?, ?, ?)
-        """ 
-    
-    values = (account, username, name, level, password)
-    
+        """
+
+    values = (account, name, username, level, password_hash)
+
     conn = None
     try:
         conn = sqlite3.connect(DB_PATH)
@@ -142,6 +150,75 @@ def add_user(username, name, level, password):
     finally:
         if conn:
             conn.close()
+
+def check_login(username, password):
+    conn = None
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        conn.row_factory = sqlite3.Row
+        cur = conn.cursor()
+
+        query = "SELECT id, username, name, level, password_hash FROM users WHERE username = ?"
+        cur.execute(query, (username,))
+        row = cur.fetchone()
+
+        if row is None:
+            return None
+
+        stored_hash = row['password_hash']
+        if check_password_hash(stored_hash, password):
+            # Return user info if password matches
+            return {
+                'id': row['id'],
+                'username': row['username'],
+                'name': row['name'],
+                'level': row['level']
+            }
+        else:
+            return None
+
+    except sqlite3.Error as e:
+        print(f"Database error: {e}")
+        raise
+    finally:
+        if conn:
+            conn.close()
+
+def create_login_token(user_info):
+    # Set expiration to 30 minutes from now
+    expiration = datetime.utcnow() + timedelta(minutes=30)
+
+    # Create JWT payload with user information
+    payload = {
+        'id': user_info['id'],
+        'username': user_info['username'],
+        'name': user_info['name'],
+        'level': user_info['level'],
+        'exp': expiration
+    }
+
+    # Encode the token
+    token = jwt.encode(payload, JWT_SECRET_KEY, algorithm=JWT_ALGORITHM)
+    return token
+
+def get_loggedin_user(token):
+    try:
+        # Decode the token
+        payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
+
+        # Return user info from token (no database query needed)
+        return {
+            'id': payload['id'],
+            'username': payload['username'],
+            'name': payload['name'],
+            'level': payload['level']
+        }
+    except jwt.ExpiredSignatureError:
+        # Token has expired
+        return None
+    except jwt.InvalidTokenError:
+        # Token is invalid
+        return None
 
 def add_professional(name, email, ext):
     conn = None
