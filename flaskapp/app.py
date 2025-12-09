@@ -21,8 +21,13 @@ if os.path.exists(REACT_DIST):
 
 # Root route - serve React app at the correct path
 @app.route("/cs3660_project/Project/flaskapp/")
+@app.route("/cs3660_project/Project/flaskapp")
 def index():
-    return send_from_directory(REACT_DIST, 'index.html')
+    try:
+        return send_from_directory(REACT_DIST, 'index.html')
+    except Exception as e:
+        print(f"Error serving index.html: {e}")
+        return f"Error: {e}", 500
 
 # Serve React assets (JS, CSS)
 @app.route("/cs3660_project/Project/flaskapp/assets/<path:filename>")
