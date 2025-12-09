@@ -11,6 +11,14 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 REACT_DIST = os.path.abspath(os.path.join(BASE_DIR, '..', 'reactapp', 'dist'))
 IMAGES_DIR = os.path.abspath(os.path.join(BASE_DIR, 'static', 'images'))
 
+# Debug: Print paths on startup
+print(f"BASE_DIR: {BASE_DIR}")
+print(f"REACT_DIST: {REACT_DIST}")
+print(f"REACT_DIST exists: {os.path.exists(REACT_DIST)}")
+print(f"IMAGES_DIR: {IMAGES_DIR}")
+if os.path.exists(REACT_DIST):
+    print(f"Files in REACT_DIST: {os.listdir(REACT_DIST)}")
+
 # Root route - serve React app at the correct path
 @app.route("/cs3660_project/Project/flaskapp/")
 def index():
