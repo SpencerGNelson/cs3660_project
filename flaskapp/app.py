@@ -19,9 +19,17 @@ print(f"IMAGES_DIR: {IMAGES_DIR}")
 if os.path.exists(REACT_DIST):
     print(f"Files in REACT_DIST: {os.listdir(REACT_DIST)}")
 
+# Log all requests to debug routing issues
+@app.before_request
+def log_request():
+    print(f"Request: {request.method} {request.path}")
+    print(f"Full URL: {request.url}")
+    print(f"Request path: {request.path}")
+
 # Root route - serve React app at the correct path
 @app.route("/cs3660_project/Project/flaskapp/")
 @app.route("/cs3660_project/Project/flaskapp")
+@app.route("/")  # Also try root route
 def index():
     try:
         return send_from_directory(REACT_DIST, 'index.html')
