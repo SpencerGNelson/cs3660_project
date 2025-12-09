@@ -20,14 +20,6 @@ export const navLinks = [
     {
         path: '/pay',
         label: 'Pay'
-    },
-    {
-        path: '/login',
-        label: 'Login'
-    },
-    {
-        path: '/register',
-        label: 'Register'
     }
 ]
 

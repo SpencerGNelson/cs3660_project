@@ -11,13 +11,13 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 REACT_DIST = os.path.abspath(os.path.join(BASE_DIR, '..', 'reactapp', 'dist'))
 IMAGES_DIR = os.path.abspath(os.path.join(BASE_DIR, 'static', 'images'))
 
-# Root route - serve React app
-@app.route("/")
+# Root route - serve React app at the correct path
+@app.route("/cs3660_project/Project/flaskapp/")
 def index():
     return send_from_directory(REACT_DIST, 'index.html')
 
 # Serve React assets (JS, CSS)
-@app.route("/assets/<path:filename>")
+@app.route("/cs3660_project/Project/flaskapp/assets/<path:filename>")
 def serve_assets(filename):
     assets_dir = os.path.join(REACT_DIST, 'assets')
     file_path = os.path.join(assets_dir, filename)
@@ -30,36 +30,43 @@ def serve_assets(filename):
         print(f"File exists: {os.path.exists(file_path)}")
         return jsonify({"error": "Asset not found", "path": file_path}), 404
 
-    return send_from_directory(assets_dir, filename)
+    # Set correct MIME type for JavaScript modules
+    mimetype = None
+    if filename.endswith('.js'):
+        mimetype = 'application/javascript'
+    elif filename.endswith('.css'):
+        mimetype = 'text/css'
+
+    return send_from_directory(assets_dir, filename, mimetype=mimetype)
 
 # Serve public images from React dist/images (like logo)
-@app.route("/images/<path:filename>")
+@app.route("/cs3660_project/Project/flaskapp/images/<path:filename>")
 def serve_public_images(filename):
     return send_from_directory(os.path.join(REACT_DIST, 'images'), filename)
 
 # Serve images from flaskapp/static/images (professionals, categories)
-@app.route("/static/images/<path:filename>")
+@app.route("/cs3660_project/Project/flaskapp/static/images/<path:filename>")
 def serve_images(filename):
     return send_from_directory(IMAGES_DIR, filename)
 
 # JSON API routes for React frontend
-@app.route("/api/get_professionals")
+@app.route("/cs3660_project/Project/flaskapp/api/get_professionals")
 def api_get_professionals():
     professionals = get_professionals()
     return jsonify([dict(row) for row in professionals])
 
-@app.route("/api/get_services")
+@app.route("/cs3660_project/Project/flaskapp/api/get_services")
 def api_get_services():
     services = get_services()
     return jsonify(services)
 
-@app.route("/api/get_categories")
+@app.route("/cs3660_project/Project/flaskapp/api/get_categories")
 def api_get_categories():
     categories = get_categories()
     return jsonify([dict(row) for row in categories])
 
 # API routes for form submissions
-@app.route("/api/contact", methods=["POST"])
+@app.route("/cs3660_project/Project/flaskapp/api/contact", methods=["POST"])
 def api_contact():
     data = request.get_json()
     name = data.get("name")
@@ -81,7 +88,7 @@ def api_contact():
         print(f"Email error: {e}")
         return jsonify({"error": "Failed to send email. Please try again later."}), 500
 
-@app.route("/api/register", methods=["POST"])
+@app.route("/cs3660_project/Project/flaskapp/api/register", methods=["POST"])
 def api_register():
     data = request.get_json()
     name = data.get("name")
@@ -102,7 +109,7 @@ def api_register():
         print(f"Registration error: {e}")
         return jsonify({"error": "Registration failed. Username may already exist."}), 500
 
-@app.route("/api/login", methods=["POST"])
+@app.route("/cs3660_project/Project/flaskapp/api/login", methods=["POST"])
 def api_login():
     data = request.get_json()
     username = data.get("username")
@@ -127,7 +134,7 @@ def api_login():
         "level": user_info['level']
     })
 
-@app.route("/api/add_professional", methods=["POST"])
+@app.route("/cs3660_project/Project/flaskapp/api/add_professional", methods=["POST"])
 @access_required(level=2)
 def api_add_professional():
     name = request.form.get("name")
@@ -162,7 +169,7 @@ def api_add_professional():
 
     return jsonify({"success": "Professional added successfully!"})
 
-@app.route("/api/add_category", methods=["POST"])
+@app.route("/cs3660_project/Project/flaskapp/api/add_category", methods=["POST"])
 @access_required(level=2)
 def api_add_category():
     name = request.form.get("name")
@@ -196,7 +203,7 @@ def api_add_category():
 
     return jsonify({"success": "Category added successfully!"})
 
-@app.route("/api/add_service", methods=["POST"])
+@app.route("/cs3660_project/Project/flaskapp/api/add_service", methods=["POST"])
 @access_required(level=2)
 def api_add_service():
     data = request.get_json()
@@ -225,22 +232,22 @@ def api_add_service():
         return jsonify({"error": "Database error occurred. Please try again."}), 500
 
 # Test routes for access_required decorator
-@app.route("/api/test_public")
+@app.route("/cs3660_project/Project/flaskapp/api/test_public")
 def test_public():
     return jsonify({"message": "This is a public route - no authentication required"})
 
-@app.route("/api/test_user")
+@app.route("/cs3660_project/Project/flaskapp/api/test_user")
 @access_required(level=1)
 def test_user():
     return jsonify({"message": "Success! You have user-level access (level >= 1)"})
 
-@app.route("/api/test_admin")
+@app.route("/cs3660_project/Project/flaskapp/api/test_admin")
 @access_required(level=10)
 def test_admin():
     return jsonify({"message": "Success! You have admin-level access (level >= 10)"})
 
 # Catch-all route for React Router (must be at the end)
-@app.route('/<path:path>')
+@app.route('/cs3660_project/Project/flaskapp/<path:path>')
 def catch_all(path):
     # If it's an API route, return 404
     if path.startswith('api/'):
