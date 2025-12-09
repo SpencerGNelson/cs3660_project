@@ -1,4 +1,5 @@
-import { Routes, Route } from 'react-router-dom'
+import { useContext } from 'react'
+import { Routes, Route, Outlet } from 'react-router-dom'
 import {
   Home, Login, Register, Contact, Professionals,
   Services, Pay, Admin, AddProfessional, AddCategory,
@@ -6,6 +7,25 @@ import {
 } from './pages'
 import Layout from './pages/layouts/Layout'
 import AdminLayout from './pages/layouts/AdminLayout'
+import { AuthContext } from './contexts/AuthContext'
+
+// Protected route component for level-based access control
+function ProtectedRoute({ minLevel }) {
+  const { level } = useContext(AuthContext)
+
+  if (level >= minLevel) {
+    return <Outlet />
+  } else {
+    return (
+      <div style={{ padding: '20px', textAlign: 'center' }}>
+        <h2>Access Denied</h2>
+        <p style={{ color: 'red' }}>You do not have permission to access this page.</p>
+        <p>Required access level: {minLevel}</p>
+        <p>Your current access level: {level}</p>
+      </div>
+    )
+  }
+}
 
 function App() {
   return (
@@ -22,12 +42,14 @@ function App() {
         </Route>
 
 
-      {/* Admin routes with AdminLayout */}
-      <Route path='/admin' element={<AdminLayout />}>
-        <Route index element={<Admin />} />
-        <Route path='add_category' element={<AddCategory />} />
-        <Route path='add_service' element={<AddService />} />
-        <Route path='add_professional' element={<AddProfessional />} />
+      {/* Admin routes with AdminLayout - Protected for level 2+ users */}
+      <Route element={<ProtectedRoute minLevel={2} />}>
+        <Route path='/admin' element={<AdminLayout />}>
+          <Route index element={<Admin />} />
+          <Route path='add_category' element={<AddCategory />} />
+          <Route path='add_service' element={<AddService />} />
+          <Route path='add_professional' element={<AddProfessional />} />
+        </Route>
       </Route>
     </Routes>
   )

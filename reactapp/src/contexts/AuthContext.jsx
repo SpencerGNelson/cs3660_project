@@ -8,12 +8,13 @@ export function AuthProvider({ children }) {
     const [level, setLevel] = useState(parseInt(localStorage.getItem("level")) || 0);
 
     const login = (token, name, level) => {
+        const parsedLevel = parseInt(level);
         setToken(token);
         setName(name);
-        setLevel(level);
+        setLevel(parsedLevel);
         localStorage.setItem("jwt_token", token);
         localStorage.setItem("name", name);
-        localStorage.setItem("level", level);
+        localStorage.setItem("level", parsedLevel);
     };
 
     const logout = () => {
