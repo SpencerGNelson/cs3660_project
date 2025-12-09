@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
-from models import get_professionals, get_services, get_categories, add_service, add_professional, add_category, add_user, email_form, check_login, create_login_token
+from models import get_professionals, get_services, get_categories, add_service, add_professional, add_category, add_user, email_form, check_login, create_login_token, access_required
 import os
 
 app = Flask(__name__)
@@ -96,7 +96,7 @@ def api_register():
         return jsonify({"error": "Passwords do not match."}), 400
 
     try:
-        add_user(username, name, "user", password)
+        add_user(username, name, 1, password)  # Level 1 for regular users
         return jsonify({"success": "Registration successful!"})
     except Exception as e:
         print(f"Registration error: {e}")
@@ -128,6 +128,7 @@ def api_login():
     })
 
 @app.route("/api/add_professional", methods=["POST"])
+@access_required(level=2)
 def api_add_professional():
     name = request.form.get("name")
     email = request.form.get("email")
@@ -162,6 +163,7 @@ def api_add_professional():
     return jsonify({"success": "Professional added successfully!"})
 
 @app.route("/api/add_category", methods=["POST"])
+@access_required(level=2)
 def api_add_category():
     name = request.form.get("name")
 
@@ -195,6 +197,7 @@ def api_add_category():
     return jsonify({"success": "Category added successfully!"})
 
 @app.route("/api/add_service", methods=["POST"])
+@access_required(level=2)
 def api_add_service():
     data = request.get_json()
     servicename = data.get("servicename")
@@ -220,6 +223,21 @@ def api_add_service():
     except Exception as e:
         print(f"Database error: {e}")
         return jsonify({"error": "Database error occurred. Please try again."}), 500
+
+# Test routes for access_required decorator
+@app.route("/api/test_public")
+def test_public():
+    return jsonify({"message": "This is a public route - no authentication required"})
+
+@app.route("/api/test_user")
+@access_required(level=1)
+def test_user():
+    return jsonify({"message": "Success! You have user-level access (level >= 1)"})
+
+@app.route("/api/test_admin")
+@access_required(level=10)
+def test_admin():
+    return jsonify({"message": "Success! You have admin-level access (level >= 10)"})
 
 # Catch-all route for React Router (must be at the end)
 @app.route('/<path:path>')

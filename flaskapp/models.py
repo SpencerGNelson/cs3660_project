@@ -4,11 +4,12 @@ from collections import defaultdict
 from email.message import EmailMessage
 import smtplib
 import getpass
-from flask import render_template
+from flask import render_template, request
 import os
 from werkzeug.security import generate_password_hash, check_password_hash
 import jwt
 from datetime import datetime, timedelta
+import functools
 
 # Get the absolute path to the database file
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -215,10 +216,29 @@ def get_loggedin_user(token):
         }
     except jwt.ExpiredSignatureError:
         # Token has expired
-        return None
+        raise Exception("err_login_expired")
     except jwt.InvalidTokenError:
         # Token is invalid
-        return None
+        raise Exception("err_login_invalid")
+
+def access_required(level):
+    def decorator(f):
+        @functools.wraps(f)  # preserves important metadata
+        def decorated_function(*args, **kwargs):
+            token = request.headers.get('Authorization')
+            if not token:
+                return "err_login_required"
+            try:
+                user = get_loggedin_user(token)
+            except Exception as e:
+                return str(e)
+            if not user:
+                return "err_login_required"
+            if user["level"] < level:
+                return "err_access_denied"
+            return f(*args, **kwargs)
+        return decorated_function
+    return decorator
 
 def add_professional(name, email, ext):
     conn = None
