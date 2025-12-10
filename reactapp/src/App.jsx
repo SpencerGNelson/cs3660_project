@@ -2,8 +2,7 @@ import { useContext } from 'react'
 import { Routes, Route, Outlet } from 'react-router-dom'
 import {
   Home, Login, Register, Contact, Professionals,
-  Services, Pay, Admin, AddProfessional, AddCategory,
-  AddService
+  Services, Pay, Admin
 } from './pages'
 import Layout from './pages/layouts/Layout'
 import AdminLayout from './pages/layouts/AdminLayout'
@@ -46,9 +45,6 @@ function App() {
       <Route element={<ProtectedRoute minLevel={2} />}>
         <Route path='/admin' element={<AdminLayout />}>
           <Route index element={<Admin />} />
-          <Route path='add_category' element={<AddCategory />} />
-          <Route path='add_service' element={<AddService />} />
-          <Route path='add_professional' element={<AddProfessional />} />
         </Route>
       </Route>
     </Routes>

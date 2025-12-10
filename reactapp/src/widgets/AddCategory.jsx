@@ -1,35 +1,15 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import axiosInstance from '../axiosInstance'
-import { usePageTitle } from '../hooks/usePageTitle'
-import { Category, Form, TextInput, File, Submit } from '../widgets'
+import { Form, TextInput, File, Submit } from './index'
 
-function AddCategory() {
-    usePageTitle('Add Category')
+function AddCategory( {onSuccess}) {
 
-    const [categories, setCategories] = useState([])
     const [success, setSuccess] = useState(null)
     const [error, setError] = useState(null)
-    const [loading, setLoading] = useState(true)
     const [formData, setFormData] = useState({
         name: '',
         image_file: null
     })
-
-    const fetchCategories = async () => {
-        try {
-            const response = await axiosInstance.get('/api/get_categories')
-            setCategories(response.data)
-            setLoading(false)
-        } catch (err) {
-            console.error('Error fetching categories:', err)
-            setError('Failed to load categories')
-            setLoading(false)
-        }
-    }
-
-    useEffect(() => {
-        fetchCategories()
-    }, [])
 
     const handleChange = (e) => {
         setFormData({
@@ -60,17 +40,15 @@ function AddCategory() {
             })
             setSuccess(response.data.success)
             setFormData({ name: '', image_file: null })
-            await fetchCategories()
+            if (onSuccess) onSuccess()
         } catch (err) {
             setError(err.response?.data?.error || 'An error occurred. Please try again.')
         }
     }
 
-    if (loading) return <p>Loading...</p>
-
     return (
         <>
-            <h2>Add Category</h2>
+            <h3>Add Category</h3>
 
             {success && (
                 <div className="alert alert-success alert-dismissible fade show" role="alert">
@@ -86,18 +64,6 @@ function AddCategory() {
                 </div>
             )}
 
-            {!categories || categories.length === 0 ? (
-                <p className="text-muted">No categories found in the database.</p>
-            ) : (
-                <div className="row g-4 mb-5" id="categoriesList">
-                    {categories.map((cat) => (
-                        <Category key={cat.id} category={cat} serviceList={false} />
-                    ))}
-                </div>
-            )}
-            <hr />
-            Add Category
-            <hr />
             <Form onSubmit={handleSubmit}>
                 <div>
                     Category<br />

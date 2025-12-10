@@ -1,36 +1,16 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import axiosInstance from '../axiosInstance'
-import { usePageTitle } from '../hooks/usePageTitle'
-import { Professional, Form, TextInput, File, Submit } from '../widgets'
+import { Form, TextInput, File, Submit } from './index'
 
-function AddProfessional() {
-    usePageTitle('Add Professional')
+function AddProfessional({ onSuccess} ) {
 
-    const [professionals, setProfessionals] = useState([])
     const [success, setSuccess] = useState(null)
     const [error, setError] = useState(null)
-    const [loading, setLoading] = useState(true)
     const [formData, setFormData] = useState({
         name: '',
         email: '',
         image_file: null
     })
-
-    const fetchProfessionals = async () => {
-        try {
-            const response = await axiosInstance.get('/api/get_professionals')
-            setProfessionals(response.data)
-            setLoading(false)
-        } catch (err) {
-            console.error('Error fetching professionals:', err)
-            setError('Failed to load professionals')
-            setLoading(false)
-        }
-    }
-
-    useEffect(() => {
-        fetchProfessionals()
-    }, [])
 
     const handleChange = (e) => {
         setFormData({
@@ -62,17 +42,15 @@ function AddProfessional() {
             })
             setSuccess(response.data.success)
             setFormData({ name: '', email: '', image_file: null })
-            await fetchProfessionals()
+            if (onSuccess) onSuccess()
         } catch (err) {
             setError(err.response?.data?.error || 'An error occurred. Please try again.')
         }
     }
 
-    if (loading) return <p>Loading...</p>
-
     return (
         <>
-            <h2>Add Service Provider</h2>
+            <h3>Add Service Provider</h3>
 
             {success && (
                 <div className="alert alert-success alert-dismissible fade show" role="alert">
@@ -88,14 +66,6 @@ function AddProfessional() {
                 </div>
             )}
 
-            <div className="row" id="professionalsList">
-                {professionals.map((pro) => (
-                    <Professional key={pro.id} professional={pro} />
-                ))}
-            </div>
-            <hr />
-            Add a New Service Provider Below
-            <hr />
             <Form onSubmit={handleSubmit}>
                 <div>
                     Provider Name<br />

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import axiosInstance from '../axiosInstance'
 import { usePageTitle } from '../hooks/usePageTitle'
-import { Professional } from '../widgets'
+import { Professional, AddProfessional, AuthorizedContent, ToggleButton } from '../widgets'
 
 function Professionals() {
     usePageTitle('Professionals')
@@ -10,19 +10,20 @@ function Professionals() {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
 
-    useEffect(() => {
-        const fetchProfessionals = async () => {
-            try {
-                const response = await axiosInstance.get('/api/get_professionals')
-                setProfessionals(response.data)
-                setLoading(false)
-            } catch (err) {
-                console.error('Error fetching professionals:', err)
-                setError('Failed to load professionals')
-                setLoading(false)
-            }
+    const fetchProfessionals = async () => {
+        try {
+            setLoading(true)
+            const response = await axiosInstance.get('/api/get_professionals')
+            setProfessionals(response.data)
+            setLoading(false)
+        } catch (err) {
+            console.error('Error fetching professionals:', err)
+            setError('Failed to load professionals')
+            setLoading(false)
         }
+    }
 
+    useEffect(() => {
         fetchProfessionals()
     }, [])
 
@@ -37,6 +38,11 @@ function Professionals() {
                     <Professional key={pro.id} professional={pro} />
                 ))}
             </div>
+            <AuthorizedContent minLevel={2}>
+                <ToggleButton buttonText="Add Professional Form">
+                    <AddProfessional onSuccess={fetchProfessionals} />
+                </ToggleButton>
+            </AuthorizedContent>
         </>
     )
 }
