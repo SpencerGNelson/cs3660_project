@@ -183,6 +183,32 @@ def check_login(username, password):
         if conn:
             conn.close()
 
+def verify_user_password(user_id, password):
+    query = "SELECT password_hash FROM users WHERE id = ?"
+
+    conn = None
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        conn.row_factory = sqlite3.Row
+        cur = conn.cursor()
+
+        cur.execute(query, (user_id,))
+        row = cur.fetchone()
+
+        if row is None:
+            return False
+        
+        stored_hash = row['password_hash']
+        return check_password_hash(stored_hash, password)
+    
+    except sqlite3.Error as e:
+        print(f"Database error: {e}")
+        return False
+    finally:
+        if conn:
+            conn.close()
+
+
 def create_login_token(user_info):
     # Set expiration to 30 minutes from now
     expiration = datetime.utcnow() + timedelta(minutes=30)

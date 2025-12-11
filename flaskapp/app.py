@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
-from models import get_professionals, get_services, get_categories, add_service, add_professional, add_category, add_user, email_form, check_login, create_login_token, access_required, update_professional_name, update_professional_email, update_professional_image, delete_professional, update_category_name, update_category_image, delete_category, update_service_name, update_service_category, delete_service, update_user_name, update_user_level, update_user_password, delete_user, update_user_username
+from models import *
 import os
 
 app = Flask(__name__)
@@ -454,34 +454,54 @@ def delete_user_route(id):
         return "err_db"
 
 @app.route("/user/<int:id>", methods=["PUT"])
-@access_required(level=2)
+@access_required(level=1)
 def update_user_route(id):
+    token = request.headers.get('Authorization')
+    try:
+        logged_in_user = get_loggedin_user(token)
+    except Exception as e:
+        return str(e)
+    
     name = request.form.get("name")
 
     if not name:
         return "err_db"
-
+    
     allowed_fields = ["name", "username", "level", "password"]
     if name not in allowed_fields:
         return "err_unrecognized_name"
+    
+    is_level_3 = logged_in_user['level'] >= 3
+    is_own_profile = logged_in_user['id'] == id
 
+    if not is_level_3 and not is_own_profile:
+        return "err_access_denied"
+    
+    if name == "level" and not is_level_3:
+        return "err_access_denied"
+    
     try:
         if name == "password":
+            old_password = request.form.get("old_password")
             value = request.form.get("value")
             confirmation = request.form.get("confirmation")
 
-            if not value or not confirmation:
+            if not old_password or not value or not confirmation:
                 return "err_db"
-
+            
+            if not verify_user_password(id, old_password):
+                return "err_wrong_password"
+            
             if value != confirmation:
-                return "err_db"
-
+                return "err_password_mismatch"
+            
             update_user_password(id, value)
 
         elif name == "name":
             value = request.form.get("value")
             if not value:
                 return "err_db"
+            
             update_user_name(id, value)
 
         elif name == "level":
@@ -497,13 +517,13 @@ def update_user_route(id):
             update_user_username(id, value)
         else:
             return "err_db"
-
+        
         return "ok"
-
+    
     except Exception as e:
         print(f"Error: {e}")
         return "err_db"
-
+    
 # Catch-all route for React Router (must be at the end)
 @app.route('/<path:path>')
 def catch_all(path):
