@@ -627,6 +627,29 @@ def update_user_password(user_id, new_password):
         if conn:
             conn.close()
 
+def update_user_username(user_id, new_username):
+    query = """
+        UPDATE users
+        SET username = ?
+        WHERE id = ?
+"""
+    values = (new_username, user_id)
+
+    conn = None
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        cur = conn.cursor()
+        cur.execute(query, values)
+        conn.commit()
+        return cur.lastrowid
+    
+    except sqlite3.Error as e:
+        print(f"Database error: {e}")
+        raise
+    finally:
+        if conn:
+            conn.close() 
+
 def delete_user(user_id):
     query = "DELETE FROM users WHERE id = ?"
 

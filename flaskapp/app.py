@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
-from models import get_professionals, get_services, get_categories, add_service, add_professional, add_category, add_user, email_form, check_login, create_login_token, access_required, update_professional_name, update_professional_email, update_professional_image, delete_professional, update_category_name, update_category_image, delete_category, update_service_name, update_service_category, delete_service, update_user_name, update_user_level, update_user_password, delete_user
+from models import get_professionals, get_services, get_categories, add_service, add_professional, add_category, add_user, email_form, check_login, create_login_token, access_required, update_professional_name, update_professional_email, update_professional_image, delete_professional, update_category_name, update_category_image, delete_category, update_service_name, update_service_category, delete_service, update_user_name, update_user_level, update_user_password, delete_user, update_user_username
 import os
 
 app = Flask(__name__)
@@ -461,6 +461,10 @@ def update_user_route(id):
     if not name:
         return "err_db"
 
+    allowed_fields = ["name", "username", "level", "password"]
+    if name not in allowed_fields:
+        return "err_unrecognized_name"
+
     try:
         if name == "password":
             value = request.form.get("value")
@@ -485,6 +489,12 @@ def update_user_route(id):
             if not value:
                 return "err_db"
             update_user_level(id, int(value))
+
+        elif name == "username":
+            value = request.form.get("value")
+            if not value:
+                return "err_db"
+            update_user_username(id, value)
         else:
             return "err_db"
 
