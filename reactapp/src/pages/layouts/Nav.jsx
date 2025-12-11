@@ -6,7 +6,7 @@ function Nav({ links }) {
             <div className="container-fluid">
                 <LinkComponent to="/" className="navbar-brand">
                     ADHDer's Annonymous
-                    <Image src="/images/adhd.jpg" style={{width: '175px', padding: '10px'}} alt="ADHD Logo" />
+                    <Image src="images/adhd.jpg" style={{width: '175px', padding: '10px'}} alt="ADHD Logo" />
                 </LinkComponent>
                 <HamburgerButton target="rightnav" />
                 <div id="rightnav" className="collapse navbar-collapse">

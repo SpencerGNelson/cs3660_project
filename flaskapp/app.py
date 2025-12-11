@@ -530,6 +530,12 @@ def catch_all(path):
     # If it's an API route, return 404
     if path.startswith('api/'):
         return jsonify({"error": "Not found"}), 404
+
+    # Try to serve the actual file if it exists in the dist folder
+    file_path = os.path.join(REACT_DIST, path)
+    if os.path.isfile(file_path):
+        return send_from_directory(REACT_DIST, path)
+
     # For all other routes, serve index.html to let React Router handle it
     return send_from_directory(REACT_DIST, 'index.html')
 
