@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
-from models import get_professionals, get_services, get_categories, add_service, add_professional, add_category, add_user, email_form, check_login, create_login_token, access_required
+from models import get_professionals, get_services, get_categories, add_service, add_professional, add_category, add_user, email_form, check_login, create_login_token, access_required, update_professional_name, update_professional_email, update_professional_image, delete_professional, update_category_name, update_category_image, delete_category, update_service_name, update_service_category, delete_service, update_user_name, update_user_level, update_user_password, delete_user
 import os
 
 app = Flask(__name__)
@@ -264,6 +264,235 @@ def test_user():
 @access_required(level=10)
 def test_admin():
     return jsonify({"message": "Success! You have admin-level access (level >= 10)"})
+
+# DELETE routes for step 2.2
+@app.route("/professional/<int:id>", methods=["DELETE"])
+@access_required(level=2)
+def delete_professional_route(id):
+    try:
+        delete_professional(id)
+        return "ok"
+    except Exception as e:
+        print(f"Database error: {e}")
+        return "err_db"
+
+# PUT routes for step 2.2
+@app.route("/professional/<int:id>", methods=["PUT"])
+@access_required(level=2)
+def update_professional_route(id):
+    name = request.form.get("name")
+
+    if not name:
+        return "err_db"
+
+    # Step 2.3: Validate that name is an allowable field
+    allowed_fields = ["name", "email", "image_file"]
+    if name not in allowed_fields:
+        return "err_unrecognized_name"
+
+    try:
+        if name == "image_file":
+            # Handle image file update
+            if "image_file" not in request.files:
+                return "err_file"
+
+            image_file = request.files["image_file"]
+            if image_file.filename == "":
+                return "err_file"
+
+            # Check if file type is allowed
+            if "." not in image_file.filename:
+                return "err_file"
+
+            ext = image_file.filename.rsplit(".", 1)[1]
+            allowed_extensions = ['jpg', 'jpeg', 'png', 'gif', 'webp']
+            if ext.lower() not in allowed_extensions:
+                return "err_file"
+
+            # Update image filename in database
+            update_professional_image(id, ext)
+
+            # Save the file
+            os.makedirs("static/images", exist_ok=True)
+            image_file.save(f"static/images/professional{id}.{ext}")
+
+        elif name == "name":
+            value = request.form.get("value")
+            if not value:
+                return "err_db"
+            update_professional_name(id, value)
+
+        elif name == "email":
+            value = request.form.get("value")
+            if not value:
+                return "err_db"
+            update_professional_email(id, value)
+        else:
+            return "err_db"
+
+        return "ok"
+
+    except Exception as e:
+        print(f"Error: {e}")
+        return "err_db"
+
+@app.route("/category/<int:id>", methods=["DELETE"])
+@access_required(level=2)
+def delete_category_route(id):
+    try:
+        delete_category(id)
+        return "ok"
+    except Exception as e:
+        print(f"Database error: {e}")
+        return "err_db"
+
+@app.route("/category/<int:id>", methods=["PUT"])
+@access_required(level=2)
+def update_category_route(id):
+    name = request.form.get("name")
+
+    if not name:
+        return "err_db"
+
+    # Step 2.3: Validate that name is an allowable field
+    allowed_fields = ["name", "image_file"]
+    if name not in allowed_fields:
+        return "err_unrecognized_name"
+
+    try:
+        if name == "image_file":
+            # Handle image file update
+            if "image_file" not in request.files:
+                return "err_file"
+
+            image_file = request.files["image_file"]
+            if image_file.filename == "":
+                return "err_file"
+
+            # Check if file type is allowed
+            if "." not in image_file.filename:
+                return "err_file"
+
+            ext = image_file.filename.rsplit(".", 1)[1]
+            allowed_extensions = ['jpg', 'jpeg', 'png', 'gif', 'webp']
+            if ext.lower() not in allowed_extensions:
+                return "err_file"
+
+            # Update image filename in database
+            update_category_image(id, ext)
+
+            # Save the file
+            os.makedirs("static/images", exist_ok=True)
+            image_file.save(f"static/images/category{id}.{ext}")
+
+        elif name == "name":
+            value = request.form.get("value")
+            if not value:
+                return "err_db"
+            update_category_name(id, value)
+        else:
+            return "err_db"
+
+        return "ok"
+
+    except Exception as e:
+        print(f"Error: {e}")
+        return "err_db"
+
+@app.route("/service/<int:id>", methods=["DELETE"])
+@access_required(level=2)
+def delete_service_route(id):
+    try:
+        delete_service(id)
+        return "ok"
+    except Exception as e:
+        print(f"Database error: {e}")
+        return "err_db"
+
+@app.route("/service/<int:id>", methods=["PUT"])
+@access_required(level=2)
+def update_service_route(id):
+    name = request.form.get("name")
+
+    if not name:
+        return "err_db"
+
+    # Step 2.3: Validate that name is an allowable field
+    allowed_fields = ["servicename"]
+    if name not in allowed_fields:
+        return "err_unrecognized_name"
+
+    try:
+        if name == "servicename":
+            value = request.form.get("value")
+            if not value:
+                return "err_db"
+            update_service_name(id, value)
+
+        elif name == "categoryid":
+            value = request.form.get("value")
+            if not value:
+                return "err_db"
+            update_service_category(id, int(value))
+        else:
+            return "err_db"
+
+        return "ok"
+
+    except Exception as e:
+        print(f"Error: {e}")
+        return "err_db"
+
+@app.route("/user/<int:id>", methods=["DELETE"])
+@access_required(level=2)
+def delete_user_route(id):
+    try:
+        delete_user(id)
+        return "ok"
+    except Exception as e:
+        print(f"Database error: {e}")
+        return "err_db"
+
+@app.route("/user/<int:id>", methods=["PUT"])
+@access_required(level=2)
+def update_user_route(id):
+    name = request.form.get("name")
+
+    if not name:
+        return "err_db"
+
+    try:
+        if name == "password":
+            value = request.form.get("value")
+            confirmation = request.form.get("confirmation")
+
+            if not value or not confirmation:
+                return "err_db"
+
+            if value != confirmation:
+                return "err_db"
+
+            update_user_password(id, value)
+
+        elif name == "name":
+            value = request.form.get("value")
+            if not value:
+                return "err_db"
+            update_user_name(id, value)
+
+        elif name == "level":
+            value = request.form.get("value")
+            if not value:
+                return "err_db"
+            update_user_level(id, int(value))
+        else:
+            return "err_db"
+
+        return "ok"
+
+    except Exception as e:
+        print(f"Error: {e}")
+        return "err_db"
 
 # Catch-all route for React Router (must be at the end)
 @app.route('/<path:path>')
