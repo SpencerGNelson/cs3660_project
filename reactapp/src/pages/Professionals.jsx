@@ -35,7 +35,7 @@ function Professionals() {
             <h2>Meet our Support Staff</h2>
             <div className="row">
                 {professionals.map((pro) => (
-                    <Professional key={pro.id} professional={pro} />
+                    <Professional key={pro.id} professional={pro} onUpdate={fetchProfessionals} />
                 ))}
             </div>
             <AuthorizedContent minLevel={2}>

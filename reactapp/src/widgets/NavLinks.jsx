@@ -22,8 +22,8 @@ function NavLinks({ links, filterHome = true }) {
                 </li>
             ))}
 
-            {/* Show Admin link if user has level >= 2 */}
-            {token && level >= 2 && (
+            {/* Show Admin link if user has level >= 3 */}
+            {token && level >= 3 && (
                 <li className="nav-item">
                     <Link className="nav-link" to="/admin">
                         Admin

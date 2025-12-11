@@ -104,14 +104,17 @@ def get_services():
     categories = [dict(row) for row in cur.fetchall()]
 
    
-    cur.execute("SELECT categoryid, servicename FROM services ORDER BY id")
+    cur.execute("SELECT id, categoryid, servicename FROM services ORDER BY id")
     flat_services = [dict(row) for row in cur.fetchall()]
 
     conn.close()
-   
+
     grouped = defaultdict(list)
     for s in flat_services:
-        grouped[s['categoryid']].append(s['servicename'])
+        grouped[s['categoryid']].append({
+            'id': s['id'],
+            'name': s['servicename']
+        })
 
     result = []
     for cat in categories:
@@ -123,6 +126,24 @@ def get_services():
         })
 
     return result
+
+def get_users():
+    """Get all users from the database (without password hashes)"""
+    conn = None
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        conn.row_factory = sqlite3.Row
+        cur = conn.cursor()
+        query = "SELECT id, account, name, username, level FROM users ORDER BY id"
+        cur.execute(query)
+        rows = cur.fetchall()
+        return [dict(row) for row in rows]
+    except sqlite3.Error as e:
+        print(f"Database error: {e}")
+        raise
+    finally:
+        if conn:
+            conn.close()
 
 def add_user(username, name, level, password):
     account = username
@@ -149,6 +170,24 @@ def add_user(username, name, level, password):
     finally:
         if conn:
             conn.close()
+
+def create_admin_user(username="superadmin", name="Super Administrator", password="admin123"):
+    """
+    Create a level 3 admin user
+    This is a convenience function for creating admin users
+
+    Args:
+        username: Admin username (default: "superadmin")
+        name: Admin display name (default: "Super Administrator")
+        password: Admin password (default: "admin123" - CHANGE THIS!)
+
+    Returns:
+        user_id: The ID of the created user
+
+    Raises:
+        Exception: If user creation fails (e.g., username already exists)
+    """
+    return add_user(username, name, 3, password)
 
 def check_login(username, password):
     conn = None

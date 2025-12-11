@@ -26,24 +26,16 @@ export const navLinks = [
 export const adminLinks = [
     {
         path: '/admin',
-        label: 'Admin'
+        label: 'User Management'
     },
     {
-        path: '/admin/add_professional',
-        label: 'Add Professional'
-    },
-    {
-        path: '/admin/add_category',
-        label: 'Add Category'
-    },
-    {
-        path: '/admin/add_service',
-        label: 'Add Service'
+        path: '/',
+        label: 'Back to Main Site'
     }
 ]
 
 export const appSettings = {
     appName: 'ADHD Support',
-    apiBaseUrl: '/cs3660_project/Project/flaskapp',  // Base URL for Flask API
+    apiBaseUrl: import.meta.env.MODE === 'production' ? '/cs3660_project/Project/flaskapp' : '',  // Base URL for Flask API
     defaultTheme: 'light'
 }

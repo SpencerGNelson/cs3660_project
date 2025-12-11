@@ -41,8 +41,8 @@ function App() {
         </Route>
 
 
-      {/* Admin routes with AdminLayout - Protected for level 2+ users */}
-      <Route element={<ProtectedRoute minLevel={2} />}>
+      {/* Admin routes with AdminLayout - Protected for level 3+ users */}
+      <Route element={<ProtectedRoute minLevel={3} />}>
         <Route path='/admin' element={<AdminLayout />}>
           <Route index element={<Admin />} />
         </Route>

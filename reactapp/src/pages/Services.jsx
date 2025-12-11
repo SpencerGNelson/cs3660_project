@@ -38,7 +38,7 @@ function Services() {
             ) : (
                 <div className="row g-4">
                     {categories.map((cat) => (
-                        <Category key={cat.id} category={cat} serviceList={true} />
+                        <Category key={cat.id} category={cat} serviceList={true} onUpdate={fetchServices} />
                     ))}
                 </div>
             )}

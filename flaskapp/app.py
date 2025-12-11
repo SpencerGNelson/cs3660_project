@@ -84,6 +84,12 @@ def api_get_categories():
     categories = get_categories()
     return jsonify([dict(row) for row in categories])
 
+@app.route("/api/get_users")
+@access_required(level=3)
+def api_get_users():
+    users = get_users()
+    return jsonify(users)
+
 # API routes for form submissions
 @app.route("/api/contact", methods=["POST"])
 def api_contact():
@@ -486,15 +492,24 @@ def update_user_route(id):
             value = request.form.get("value")
             confirmation = request.form.get("confirmation")
 
-            if not old_password or not value or not confirmation:
+            if not value or not confirmation:
                 return "err_db"
-            
-            if not verify_user_password(id, old_password):
-                return "err_wrong_password"
-            
+
+            # Level 3 users don't need old password when editing other users
+            # But they do need it when editing their own profile
+            if is_level_3 and not is_own_profile:
+                # Level 3 editing someone else's password - no old password required
+                pass
+            else:
+                # Either not level 3, or level 3 editing own password - old password required
+                if not old_password:
+                    return "err_db"
+                if not verify_user_password(id, old_password):
+                    return "err_wrong_password"
+
             if value != confirmation:
                 return "err_password_mismatch"
-            
+
             update_user_password(id, value)
 
         elif name == "name":
