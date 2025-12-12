@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import axiosInstance from '../axiosInstance'
 import { usePageTitle } from '../hooks/usePageTitle'
 import { Form, TextInput, Submit } from '../widgets'
+import { getErrorMessage } from '../utils/errorMessages'
 
 function Register() {
     usePageTitle('Register')
@@ -35,7 +36,13 @@ function Register() {
             setFormData({ name: '', username: '', password: '', confirmation: '' })
             setTimeout(() => navigate('/login'), 2000)
         } catch (err) {
-            setError(err.response?.data?.error || 'An error occurred. Please try again.')
+            // Handle error codes from Flask
+            const errorCode = err.response?.data?.error || err.response?.data
+            if (errorCode) {
+                setError(getErrorMessage(errorCode))
+            } else {
+                setError('An error occurred. Please try again.')
+            }
         }
     }
 

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import axiosInstance from '../axiosInstance'
 import { usePageTitle } from '../hooks/usePageTitle'
 import { Form, TextInput, TextArea, Submit } from '../widgets'
+import { getErrorMessage } from '../utils/errorMessages'
 
 function Contact() {
     usePageTitle('Contact')
@@ -33,7 +34,13 @@ function Contact() {
             setSuccess(response.data.success)
             setFormData({ name: '', phone: '', email: '', subject: '', message: '' })
         } catch (err) {
-            setError(err.response?.data?.error || 'An error occurred. Please try again.')
+            // Handle error codes from Flask
+            const errorCode = err.response?.data?.error || err.response?.data
+            if (errorCode) {
+                setError(getErrorMessage(errorCode))
+            } else {
+                setError('An error occurred. Please try again.')
+            }
         }
     }
 

@@ -22,6 +22,15 @@ function NavLinks({ links, filterHome = true }) {
                 </li>
             ))}
 
+            {/* Show User Profile link for all logged in users (level 1+) */}
+            {token && (
+                <li className="nav-item">
+                    <Link className="nav-link" to="/user_profile">
+                        Profile
+                    </Link>
+                </li>
+            )}
+
             {/* Show Admin link if user has level >= 3 */}
             {token && level >= 3 && (
                 <li className="nav-item">

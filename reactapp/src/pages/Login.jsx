@@ -4,6 +4,7 @@ import { usePageTitle } from '../hooks/usePageTitle'
 import { AuthContext } from '../contexts/AuthContext'
 import { Form, TextInput, Submit } from '../widgets'
 import axiosInstance from '../axiosInstance'
+import { getErrorMessage } from '../utils/errorMessages'
 
 function Login() {
     usePageTitle('Login')
@@ -26,14 +27,16 @@ function Login() {
             })
 
             // Login successful - save token and user info
-            const { token, name, level } = response.data
-            login(token, name, level)
+            const { token, id, username: userUsername, name, level } = response.data
+            login(token, id, userUsername, name, level)
 
             // Redirect to home page
             navigate('/')
         } catch (err) {
-            if (err.response?.data) {
-                setError(err.response.data)
+            // Handle error codes from Flask
+            const errorCode = err.response?.data
+            if (errorCode) {
+                setError(getErrorMessage(errorCode))
             } else {
                 setError('Login failed. Please try again.')
             }

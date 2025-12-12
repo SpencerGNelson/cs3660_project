@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import axiosInstance from '../axiosInstance'
+import { getErrorMessage } from '../utils/errorMessages'
 
 function Editable({ text, route, fieldName, onSuccess }) {
     const [isEditing, setIsEditing] = useState(false)
@@ -36,11 +37,15 @@ function Editable({ text, route, fieldName, onSuccess }) {
                 setOriginalValue(value)
                 if (onSuccess) onSuccess()
             } else {
-                setError(response.data || 'Update failed')
+                // Handle error codes from Flask
+                const errorCode = response.data
+                setError(getErrorMessage(errorCode))
                 setValue(originalValue)
             }
         } catch (err) {
-            setError(err.response?.data || 'An error occurred')
+            // Handle HTTP errors (404, 500, etc.)
+            const errorCode = err.response?.data
+            setError(getErrorMessage(errorCode) || 'An error occurred')
             setValue(originalValue)
         } finally {
             setIsPending(false)

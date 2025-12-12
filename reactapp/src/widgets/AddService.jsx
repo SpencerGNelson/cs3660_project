@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import axiosInstance from '../axiosInstance'
 import { Form, TextInput, Submit } from './index'
+import { getErrorMessage } from '../utils/errorMessages'
 
 function AddService({ onSuccess }) {
 
@@ -29,7 +30,13 @@ function AddService({ onSuccess }) {
             setFormData({ servicename: '', category_name: '' })
             if (onSuccess) onSuccess()
         } catch (err) {
-            setError(err.response?.data?.error || 'An error occurred. Please try again.')
+            // Handle error codes from Flask
+            const errorCode = err.response?.data?.error || err.response?.data
+            if (errorCode) {
+                setError(getErrorMessage(errorCode))
+            } else {
+                setError('An error occurred. Please try again.')
+            }
         }
     }
 

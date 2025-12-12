@@ -155,6 +155,8 @@ def api_login():
     # Return token and user info
     return jsonify({
         "token": token,
+        "id": user_info['id'],
+        "username": user_info['username'],
         "name": user_info['name'],
         "level": user_info['level']
     })
@@ -538,20 +540,26 @@ def update_user_route(id):
     except Exception as e:
         print(f"Error: {e}")
         return "err_db"
+
+@app.errorhandler(404)
+def not_found_error(error):
+    return "err_notfound", 404
+
+@app.errorhandler(500)
+def internal_error(error):
+    return "err_internal", 500
     
-# Catch-all route for React Router (must be at the end)
 @app.route('/<path:path>')
 def catch_all(path):
-    # If it's an API route, return 404
     if path.startswith('api/'):
-        return jsonify({"error": "Not found"}), 404
+        # Raise 404 to trigger error handler
+        from flask import abort
+        abort(404)
 
-    # Try to serve the actual file if it exists in the dist folder
     file_path = os.path.join(REACT_DIST, path)
     if os.path.isfile(file_path):
         return send_from_directory(REACT_DIST, path)
 
-    # For all other routes, serve index.html to let React Router handle it
     return send_from_directory(REACT_DIST, 'index.html')
 
 if __name__ == "__main__":

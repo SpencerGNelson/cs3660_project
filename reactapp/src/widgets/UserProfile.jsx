@@ -2,6 +2,7 @@ import { useContext, useState } from 'react'
 import { AuthContext } from '../contexts/AuthContext'
 import DeleteButton from './DeleteButton'
 import Editable from './Editable'
+import { getErrorMessage } from '../utils/errorMessages'
 
 function UserProfile({ user, onUpdate, isLevel3 }) {
     const { id: currentUserId } = useContext(AuthContext)
@@ -53,7 +54,8 @@ function UserProfile({ user, onUpdate, isLevel3 }) {
                 setShowPasswordForm(false)
                 setTimeout(() => setPasswordSuccess(null), 3000)
             } else {
-                setPasswordError(result)
+                // Handle error codes from Flask
+                setPasswordError(getErrorMessage(result))
             }
         } catch (err) {
             setPasswordError('An error occurred while updating password')

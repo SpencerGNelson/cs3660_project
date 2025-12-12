@@ -17,4 +17,3 @@ if __name__ == "__main__":
         print(f"✗ Failed to create admin user: {e}")
         print(f"  This user may already exist.")
 
-        #still working on step 3.4, admin login doesn't work

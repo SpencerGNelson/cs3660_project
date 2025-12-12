@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import axiosInstance from '../axiosInstance'
+import { getErrorMessage } from '../utils/errorMessages'
 
 function DeleteButton({ route, onSuccess }) {
     const [isDeleting, setIsDeleting] = useState(false)
@@ -19,10 +20,14 @@ function DeleteButton({ route, onSuccess }) {
             if (response.data === 'ok') {
                 if (onSuccess) onSuccess()
             } else {
-                setError(response.data || 'Delete failed')
+                // Handle error codes from Flask
+                const errorCode = response.data
+                setError(getErrorMessage(errorCode))
             }
         } catch (err) {
-            setError(err.response?.data || 'An error occurred')
+            // Handle HTTP errors (404, 500, etc.)
+            const errorCode = err.response?.data
+            setError(getErrorMessage(errorCode) || 'An error occurred')
         } finally {
             setIsDeleting(false)
         }
