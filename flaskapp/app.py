@@ -552,7 +552,6 @@ def internal_error(error):
 @app.route('/<path:path>')
 def catch_all(path):
     if path.startswith('api/'):
-        # Raise 404 to trigger error handler
         from flask import abort
         abort(404)
 
